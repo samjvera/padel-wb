@@ -1,11 +1,45 @@
-// Semana ISO: la app se organiza por semanas que arrancan el lunes.
+// La semana del grupo NO empieza a medianoche: empieza el LUNES a las
+// 8:00 AM hora de Caracas. A esa hora la app pasa sola a una semana nueva
+// y vuelve a estar en blanco. No hace falta ningún servidor: se calcula
+// en el teléfono de cada quien, así que todos ven lo mismo a la vez.
+
+const ZONA = 'America/Caracas';
+const HORA_REINICIO = 8;
+
+// Diferencia entre la hora de Caracas y UTC, en milisegundos.
+// Se consulta al sistema en vez de fijarla, por si Venezuela vuelve a
+// cambiar de huso horario algún día.
+function desfaseCaracas(d) {
+  const enUTC = new Date(d.toLocaleString('en-US', { timeZone: 'UTC' }));
+  const enCaracas = new Date(d.toLocaleString('en-US', { timeZone: ZONA }));
+  return enCaracas.getTime() - enUTC.getTime();
+}
+
+/** Identificador de la semana en curso, por ejemplo "2026-W31". */
 export function weekId(date = new Date()) {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const day = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - day);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  const week = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
-  return `${d.getUTCFullYear()}-W${String(week).padStart(2, '0')}`;
+  // Pasamos a hora de Caracas y retrocedemos las 8 horas del reinicio:
+  // así el lunes antes de las 8 AM todavía cuenta como la semana anterior.
+  const t = date.getTime() + desfaseCaracas(date) - HORA_REINICIO * 3600000;
+  const d = new Date(t);
+
+  const dia = d.getUTCDay() || 7;
+  const jueves = new Date(d);
+  jueves.setUTCDate(d.getUTCDate() + 4 - dia);
+  const inicioAno = new Date(Date.UTC(jueves.getUTCFullYear(), 0, 1));
+  const semana = Math.ceil(((jueves - inicioAno) / 86400000 + 1) / 7);
+  return `${jueves.getUTCFullYear()}-W${String(semana).padStart(2, '0')}`;
+}
+
+/** Momento exacto del próximo reinicio, en hora local del dispositivo. */
+export function proximoReinicio(date = new Date()) {
+  const desfase = desfaseCaracas(date);
+  const enCaracas = new Date(date.getTime() + desfase);
+  const d = new Date(enCaracas);
+  d.setUTCHours(HORA_REINICIO, 0, 0, 0);
+  const diasHastaLunes = (8 - (d.getUTCDay() || 7)) % 7;
+  d.setUTCDate(d.getUTCDate() + diasHastaLunes);
+  if (d.getTime() <= enCaracas.getTime()) d.setUTCDate(d.getUTCDate() + 7);
+  return new Date(d.getTime() - desfase);
 }
 
 export const DIAS = [

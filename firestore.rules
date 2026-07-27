@@ -2,43 +2,40 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Antes de la configuración inicial no existe meta/setup, así que
-    // cualquier persona con sesión de Google puede crear el grupo.
-    // En cuanto se crea, esta puerta se cierra para siempre.
-    function sinConfigurar() {
-      return request.auth != null
-        && !exists(/databases/$(database)/documents/meta/setup);
-    }
+    // Esta app NO usa contraseñas ni cuentas: cualquiera con el enlace entra.
+    // Las reglas no controlan QUIÉN escribe, sino QUÉ se puede escribir, para
+    // que un robot que encuentre la dirección no pueda llenar la base de datos
+    // de basura ni borrar el grupo.
 
-    // Después, solo entran los correos que estén en la lista.
-    function esDelGrupo() {
-      return request.auth != null
-        && exists(/databases/$(database)/documents/allowlist/$(request.auth.token.email));
-    }
-
-    function permitido() { return esDelGrupo() || sinConfigurar(); }
-
-    match /allowlist/{email} {
-      allow read: if request.auth != null;
-      allow write: if sinConfigurar();
+    function tamanoSano() {
+      return request.resource.data.size() < 40;
     }
 
     match /players/{id} {
-      allow read: if permitido();
-      // Ya configurado, solo se pueden crear o editar invitados.
-      allow create: if sinConfigurar()
-        || (esDelGrupo() && request.resource.data.isGuest == true);
-      allow update: if sinConfigurar()
-        || (esDelGrupo() && resource.data.isGuest == true);
-      allow delete: if false;
+      allow read: if true;
+      allow create, update: if tamanoSano();
+      allow delete: if false;           // nadie puede borrar jugadores
     }
 
-    match /weeks/{wid}    { allow read, write: if esDelGrupo(); }
-    match /sessions/{wid} { allow read, write: if esDelGrupo(); }
+    match /weeks/{wid} {
+      // Solo semanas con formato 2026-W31: bloquea documentos inventados
+      allow read: if true;
+      allow write: if wid.matches('^[0-9]{4}-W[0-9]{2}$');
+    }
+
+    match /sessions/{wid} {
+      allow read: if true;
+      allow write: if wid.matches('^[0-9]{4}-W[0-9]{2}$');
+    }
 
     match /meta/{doc} {
-      allow read: if permitido();
-      allow write: if permitido();
+      allow read: if true;
+      allow write: if doc in ['payments', 'setup'] && tamanoSano();
+    }
+
+    // Cualquier otra ruta queda cerrada
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

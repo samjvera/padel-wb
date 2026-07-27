@@ -1,8 +1,5 @@
 import { initializeApp } from 'firebase/app';
 import {
-  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
-} from 'firebase/auth';
-import {
   getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot,
   collection, serverTimestamp, deleteField, writeBatch,
 } from 'firebase/firestore';
@@ -11,14 +8,16 @@ import { firebaseConfig } from '../config';
 
 const app = initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-export const login = () => signInWithPopup(auth, new GoogleAuthProvider());
-export const logout = () => signOut(auth);
-export const watchAuth = cb => onAuthStateChanged(auth, cb);
-
 /* ---------- jugadores ---------- */
+
+/* ---------- quién soy (guardado en este navegador) ---------- */
+
+const CLAVE = 'padel:yo';
+export const leerYo = () => localStorage.getItem(CLAVE);
+export const guardarYo = id => localStorage.setItem(CLAVE, id);
+export const olvidarYo = () => localStorage.removeItem(CLAVE);
 
 export function watchPlayers(cb, onError) {
   return onSnapshot(collection(db, 'players'), snap => {
@@ -26,6 +25,29 @@ export function watchPlayers(cb, onError) {
     snap.forEach(d => { map[d.id] = { id: d.id, ...d.data() }; });
     cb(map);
   }, err => onError?.(err));
+}
+
+/**
+ * Une a alguien al grupo escribiendo su nombre.
+ * Si el nombre ya existe (sin distinguir mayúsculas ni acentos) devuelve a esa
+ * persona; si es nuevo, lo crea como invitado —fuera de la rotación de pago—.
+ */
+export async function unirse(nombre, players) {
+  const id = nombre.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+  if (!id) throw new Error('Escribe un nombre');
+
+  if (players[id]) {
+    if (players[id].active === false) {
+      await setDoc(doc(db, 'players', id), { active: true }, { merge: true });
+    }
+    return id;
+  }
+  await setDoc(doc(db, 'players', id), {
+    name: nombre.trim(), gender: null, isGuest: true, active: true,
+  });
+  return id;
 }
 
 export function addGuest(name, gender) {
@@ -37,14 +59,13 @@ export function addGuest(name, gender) {
 
 export const removeGuest = id => setDoc(doc(db, 'players', id), { active: false }, { merge: true });
 
-/** Configuración inicial: crea jugadores, lista de acceso y orden de pago. */
+/** Configuración inicial: crea los jugadores y el orden de pago. */
 export async function crearGrupo(jugadores, ordenPago) {
   const batch = writeBatch(db);
   for (const j of jugadores) {
     batch.set(doc(db, 'players', j.id), {
-      name: j.name, email: j.email, gender: j.gender, isGuest: false, active: true,
+      name: j.name, gender: j.gender, isGuest: false, active: true,
     });
-    batch.set(doc(db, 'allowlist', j.email), { playerId: j.id });
   }
   batch.set(doc(db, 'meta', 'payments'), { paidCount: {}, history: [], order: ordenPago });
   batch.set(doc(db, 'meta', 'setup'), { done: true, at: serverTimestamp() });

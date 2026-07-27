@@ -1,4 +1,8 @@
 node_modules
 dist
 .env
-service-account.json
+
+# Basura que crean Windows y Mac dentro de las carpetas
+Thumbs.db
+desktop.ini
+.DS_Store

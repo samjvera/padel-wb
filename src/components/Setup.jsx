@@ -3,21 +3,21 @@ import { crearGrupo } from '../lib/firebase';
 
 // Prefijado con el grupo. Se puede cambiar todo antes de crear.
 const INICIAL = [
-  { name: 'Ricardo',  email: '', gender: 'M' },
-  { name: 'Arturo',   email: '', gender: 'M' },
-  { name: 'Enrique',  email: '', gender: 'M' },
-  { name: 'Santiago', email: '', gender: 'M' },
-  { name: 'Samuel',   email: '', gender: 'M' },
-  { name: 'Matias',   email: '', gender: 'M' },
-  { name: 'Angela',   email: '', gender: 'F' },
-  { name: 'Daniela',  email: '', gender: 'F' },
+  { name: 'Ricardo',  gender: 'M' },
+  { name: 'Arturo',   gender: 'M' },
+  { name: 'Enrique',  gender: 'M' },
+  { name: 'Santiago', gender: 'M' },
+  { name: 'Samuel',   gender: 'M' },
+  { name: 'Matias',   gender: 'M' },
+  { name: 'Angela',   gender: 'F' },
+  { name: 'Daniela',  gender: 'F' },
 ];
 
 const idDe = n => n.trim().toLowerCase()
   .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   .replace(/[^a-z0-9]/g, '') || 'jugador';
 
-export default function Setup({ user }) {
+export default function Setup() {
   const [filas, setFilas] = useState(INICIAL);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState(null);
@@ -41,16 +41,15 @@ export default function Setup({ user }) {
     });
   }
 
-  const correosOk = filas.every(f => !f.name.trim() || /.+@.+\..+/.test(f.email.trim()));
-  const yoEstoy = filas.some(f => f.email.trim().toLowerCase() === user.email.toLowerCase());
-  const listo = correosOk && yoEstoy && filas.some(f => f.name.trim());
+  const nombres = filas.map(f => f.name.trim()).filter(Boolean);
+  const repetidos = nombres.length !== new Set(nombres.map(n => n.toLowerCase())).size;
+  const listo = nombres.length >= 4 && !repetidos;
 
   async function crear() {
     setGuardando(true); setError(null);
     try {
       const jugadores = filas.filter(f => f.name.trim()).map(f => ({
-        id: idDe(f.name), name: f.name.trim(),
-        email: f.email.trim().toLowerCase(), gender: f.gender,
+        id: idDe(f.name), name: f.name.trim(), gender: f.gender,
       }));
       await crearGrupo(jugadores, varones.map(v => idDe(v.name)));
     } catch (e) {
@@ -64,9 +63,8 @@ export default function Setup({ user }) {
       <p className="t-eyebrow">Primera vez</p>
       <h1 className="t-display text-3xl mt-1">Crea tu grupo</h1>
       <p className="text-sm text-line/60 mt-3 leading-relaxed">
-        Esto se hace una sola vez. Escribe el correo de Google de cada persona:
-        es la llave con la que entrarán. Si el correo no es exacto, esa persona
-        no podrá abrir la app.
+        Esto se hace una sola vez. Escribe los nombres del grupo y marca quién
+        entra en la rotación de pago.
       </p>
 
       <div className="panel p-3 mt-6 space-y-3">
@@ -85,11 +83,6 @@ export default function Setup({ user }) {
                 </button>
               ))}
             </div>
-            <input
-              className="col-span-2 bg-night/60 border border-glass/50 rounded-lg px-3 py-2 text-sm t-num"
-              value={f.email} placeholder="correo de Google" inputMode="email"
-              onChange={e => set(i, 'email', e.target.value)}
-            />
           </div>
         ))}
       </div>
@@ -111,14 +104,11 @@ export default function Setup({ user }) {
         </ul>
       </div>
 
-      {!yoEstoy && (
-        <p className="text-xs text-flood mt-4 leading-relaxed">
-          Tu correo ({user.email}) todavía no está en la lista. Ponlo en una de
-          las filas o no podrás volver a entrar.
-        </p>
+      {repetidos && (
+        <p className="text-xs text-flood mt-4">Hay dos personas con el mismo nombre.</p>
       )}
-      {!correosOk && (
-        <p className="text-xs text-flood mt-2">Hay un correo mal escrito.</p>
+      {nombres.length < 4 && (
+        <p className="text-xs text-flood mt-4">Hacen falta al menos 4 jugadores.</p>
       )}
       {error && <p className="text-xs text-flood mt-2">{error}</p>}
 
@@ -126,8 +116,8 @@ export default function Setup({ user }) {
         {guardando ? 'Creando…' : 'Crear el grupo'}
       </button>
       <p className="text-xs text-line/45 mt-3 leading-relaxed">
-        Después de esto, nadie más podrá volver a esta pantalla. Para añadir o
-        cambiar gente se edita directamente en Firebase.
+        Después de esto, nadie volverá a ver esta pantalla. Para añadir o cambiar
+        gente se edita directamente en Firebase.
       </p>
     </div>
   );

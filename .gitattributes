@@ -1,0 +1,3 @@
+# Evita el aviso de GitHub Desktop sobre finales de línea LF/CRLF.
+# Es solo cosmético: no cambia cómo funciona la app.
+* text=auto eol=lf

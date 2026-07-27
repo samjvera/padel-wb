@@ -4,17 +4,16 @@ import MatchDay from './components/MatchDay';
 import Payments from './components/Payments';
 import Setup from './components/Setup';
 import { configurado } from './config';
-import { weekId, whoIsIn } from './lib/week';
+import { weekId, whoIsIn, proximoReinicio } from './lib/week';
 import { elegirPagador } from './lib/payments';
 import {
-  watchAuth, login, logout, watchPlayers, watchWeek, watchSession,
-  watchPayments, fijarDia, reabrirSemana, ensureWeek,
+  watchPlayers, watchWeek, watchSession, watchPayments,
+  fijarDia, reabrirSemana, ensureWeek, leerYo, guardarYo, olvidarYo, unirse,
 } from './lib/firebase';
 
-const wid = weekId();
-
 export default function App() {
-  const [user, setUser] = useState(undefined);
+  const [wid, setWid] = useState(() => weekId());
+  const [yo, setYo] = useState(() => leerYo());
   const [players, setPlayers] = useState({});
   const [week, setWeek] = useState({ availability: {}, status: 'abierta' });
   const [session, setSession] = useState(null);
@@ -23,30 +22,34 @@ export default function App() {
   const [cargado, setCargado] = useState(false);
   const [denegado, setDenegado] = useState(false);
 
-  useEffect(() => watchAuth(setUser), []);
+  // Cada minuto comprueba si ya pasó el reinicio del lunes 8 AM.
+  // Si la app está abierta en ese momento, cambia de semana sola.
   useEffect(() => {
-    if (!user) return;
+    const t = setInterval(() => setWid(w => (weekId() !== w ? weekId() : w)), 60000);
+    return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
     ensureWeek(wid);
     const u = [
       watchPlayers(
         p => { setPlayers(p); setCargado(true); setDenegado(false); },
-        () => setDenegado(true),   // el correo no está en la lista de acceso
+        () => setDenegado(true),   // reglas de Firestore mal publicadas
       ),
       watchWeek(wid, setWeek), watchSession(wid, setSession), watchPayments(setPagos),
     ];
     return () => u.forEach(f => f());
-  }, [user]);
+  }, [wid]);
 
   if (!configurado) return <FaltaConfig />;
-  if (user === undefined) return <Splash text="Entrando…" />;
-  if (user === null) return <Login />;
-  if (denegado) return <NoAutorizado email={user.email} />;
+  if (denegado) return <SinPermiso />;
   if (!cargado) return <Splash text="Cargando…" />;
-  if (!Object.keys(players).length) return <Setup user={user} />;
+  if (!Object.keys(players).length) return <Setup />;
 
-  const me = Object.values(players)
-    .find(p => p.email && p.email.toLowerCase() === user.email.toLowerCase());
-  if (!me) return <NoAutorizado email={user.email} />;
+  const me = players[yo];
+  if (!me || me.active === false) {
+    return <QuienEres players={players} onElegir={id => { guardarYo(id); setYo(id); }} />;
+  }
 
   const fijada = week.status === 'fijada';
 
@@ -59,7 +62,8 @@ export default function App() {
 
   return (
     <div className="min-h-dvh max-w-lg mx-auto px-4 pb-28 pt-6">
-      <Header wid={wid} me={me} fijada={fijada} />
+      <Header wid={wid} me={me} fijada={fijada}
+        onCambiar={() => { olvidarYo(); setYo(null); }} />
 
       <main className="mt-6">
         {tab === 'semana' && (fijada
@@ -77,7 +81,13 @@ export default function App() {
   );
 }
 
-function Header({ wid, me, fijada }) {
+function Header({ wid, me, fijada, onCambiar }) {
+  const r = proximoReinicio();
+  const dias = Math.round((r - Date.now()) / 86400000);
+  const cuando = dias <= 0
+    ? `hoy a las ${r.getHours()}:00`
+    : dias === 1 ? 'mañana' : `en ${dias} días`;
+
   return (
     <header className="flex items-start justify-between">
       <div>
@@ -85,9 +95,10 @@ function Header({ wid, me, fijada }) {
         <p className="t-eyebrow mt-1">
           {wid} · {fijada ? 'noche fijada' : 'recogiendo horarios'}
         </p>
+        <p className="t-eyebrow mt-0.5 text-line/30">se reinicia {cuando}</p>
       </div>
-      <button onClick={logout} className="chip text-line/60" title="Cerrar sesión">
-        {me?.name ?? 'salir'}
+      <button onClick={onCambiar} className="chip text-line/60" title="No soy yo">
+        {me?.name}
       </button>
     </header>
   );
@@ -163,32 +174,79 @@ function Splash({ text }) {
   );
 }
 
-function Login() {
+function QuienEres({ players, onElegir }) {
+  const [nombre, setNombre] = useState('');
+  const [ocupado, setOcupado] = useState(false);
+  const [error, setError] = useState(null);
+
+  const conocidos = Object.values(players)
+    .filter(p => p.active !== false)
+    .sort((a, b) => Number(a.isGuest) - Number(b.isGuest) || a.name.localeCompare(b.name));
+
+  async function entrar(texto) {
+    const n = (texto ?? nombre).trim();
+    if (!n) return;
+    setOcupado(true); setError(null);
+    try {
+      onElegir(await unirse(n, players));
+    } catch (e) {
+      setError(e.message || 'No se pudo guardar');
+      setOcupado(false);
+    }
+  }
+
   return (
-    <div className="min-h-dvh grid place-items-center px-6">
-      <div className="text-center max-w-xs">
-        <h1 className="t-display text-5xl leading-none">Cancha</h1>
-        <p className="text-sm text-line/55 mt-4 leading-relaxed">
-          Horarios, americano y turno de pago para los jueves de pádel.
-        </p>
-        <button className="btn btn-flood w-full mt-8" onClick={login}>
-          Entrar con Google
+    <div className="min-h-dvh max-w-lg mx-auto px-6 py-12">
+      <h1 className="t-display text-4xl leading-none">Cancha</h1>
+      <p className="t-eyebrow mt-5">¿Cómo te llamas?</p>
+      <p className="text-sm text-line/55 mt-2 leading-relaxed">
+        Escribe tu nombre y ya estás dentro. Se queda guardado en este teléfono.
+      </p>
+
+      <div className="flex gap-2 mt-5">
+        <input
+          className="flex-1 bg-night/60 border border-glass/50 rounded-lg px-3 py-3"
+          value={nombre} onChange={e => setNombre(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && entrar()}
+          placeholder="Tu nombre" autoFocus maxLength={20}
+        />
+        <button className="btn btn-flood px-5" disabled={!nombre.trim() || ocupado}
+          onClick={() => entrar()}>
+          Entrar
         </button>
       </div>
+      {error && <p className="text-xs text-flood mt-2">{error}</p>}
+
+      {conocidos.length > 0 && (
+        <>
+          <p className="t-eyebrow mt-8">O toca tu nombre si ya estás</p>
+          <div className="grid grid-cols-2 gap-2 mt-3">
+            {conocidos.map(p => (
+              <button key={p.id} onClick={() => entrar(p.name)} disabled={ocupado}
+                className="btn btn-ghost py-3 text-sm">{p.name}</button>
+            ))}
+          </div>
+        </>
+      )}
+
+      <p className="text-xs text-line/40 mt-8 leading-relaxed">
+        Si escribes un nombre que ya existe, entras como esa persona. Los nombres
+        nuevos se añaden como invitados y no entran en la rotación de pago.
+      </p>
     </div>
   );
 }
 
-function NoAutorizado({ email }) {
+function SinPermiso() {
   return (
     <div className="min-h-dvh grid place-items-center px-6">
-      <div className="text-center max-w-xs">
-        <h1 className="t-display text-2xl">Esta cuenta no está en el grupo</h1>
-        <p className="text-sm text-line/55 mt-3 t-num break-all">{email}</p>
-        <p className="text-sm text-line/55 mt-3">
-          Pide que añadan este correo a la lista de jugadores en Firestore.
+      <div className="max-w-sm">
+        <h1 className="t-display text-2xl">Firestore está bloqueado</h1>
+        <p className="text-sm text-line/60 mt-3 leading-relaxed">
+          Las reglas de seguridad no se publicaron. Vuelve al Paso 4 del README:
+          Firestore Database → pestaña Reglas → pega el contenido de
+          <span className="t-num text-flood"> firestore.rules</span> → Publicar.
         </p>
-        <button className="btn btn-ghost w-full mt-6" onClick={logout}>Salir</button>
       </div>
     </div>
   );
