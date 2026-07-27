@@ -3,422 +3,329 @@
 App para organizar los pádel del grupo: quién puede qué día, el cuadro del
 americano, los marcadores y a quién le toca pagar la cancha.
 
+Cada **lunes a las 8:00 de la mañana, hora de Caracas**, se reinicia sola y
+queda lista para organizar la semana siguiente.
+
 ---
 
 ## Antes de empezar
 
-**Tiempo:** unos 25 minutos, una sola vez.
+**Tiempo:** unos 20 minutos, una sola vez.
 
-**Costo:** cero. No te va a pedir tarjeta de crédito en ningún momento.
+**Costo:** cero. No te pedirá tarjeta de crédito en ningún momento.
 
-**No necesitas instalar nada.** Ni programas, ni terminal, ni saber programar.
-Todo se hace desde el navegador, haciendo clic.
+**No hay que instalar nada** ni saber programar. Ni terminal, ni comandos.
 
-**Necesitas dos cuentas, y solo tú:**
+**Solo tú necesitas cuentas.** Una de Google (la de Gmail sirve) para crear la
+base de datos, y una de GitHub para publicar la página. Tus amigos no necesitan
+ninguna: abren el enlace, escriben su nombre y ya está.
 
-- Una cuenta de Google, para crear el Firebase (la de Gmail sirve).
-- Una cuenta de GitHub. Si no tienes, créala gratis en
-  [github.com/signup](https://github.com/signup). Apunta el nombre de usuario
-  que elijas, lo vas a usar varias veces.
+Vas a usar dos servicios gratuitos:
 
-Tus amigos **no necesitan ninguna cuenta**: abren el enlace y listo.
-
-Vamos a usar dos servicios:
-
-- **Firebase** guarda la información (quién puede jugar, los marcadores, los pagos).
+- **Firebase** guarda la información: quién puede jugar, los marcadores, los pagos.
 - **GitHub** guarda la app y la publica como página web.
 
-> **Firebase rediseña su menú cada pocos meses.** Si no encuentras algo donde
-> dice aquí, usa el buscador **Buscar productos** que está arriba del todo en la
-> barra lateral izquierda: escribe el nombre de lo que buscas (`Authentication`,
-> `Firestore`) y te lleva directo. Ese buscador no cambia de sitio.
+Son **9 pasos**. Al final de cada uno hay una comprobación para saber si vas bien
+antes de seguir.
+
+> **Firebase rediseña sus menús cada pocos meses.** Si algo no está donde dice
+> aquí, usa el buscador **Buscar productos**, arriba del todo en la barra
+> lateral: escribe `Firestore` o lo que busques y te lleva directo. Ese buscador
+> no se mueve.
 
 ---
 
-# PARTE 1 — Firebase (donde se guarda todo)
+# PARTE 1 — Firebase
 
 ## Paso 1. Crear el proyecto
 
 1. Entra a [console.firebase.google.com](https://console.firebase.google.com) e
    inicia sesión con tu cuenta de Google.
-2. Haz clic en **Crear un proyecto**.
-3. Ponle un nombre. Por ejemplo `padel`. Firebase le añadirá unos números al
-   final para que sea único; eso es normal.
-4. Cuando te pregunte por **Google Analytics**, **desactívalo**. No lo
-   necesitas y te ahorra pasos.
+2. Clic en **Crear un proyecto**.
+3. Ponle un nombre, por ejemplo `padel-wb`. Firebase puede añadirle unos números
+   al final para que sea único; es normal.
+4. Cuando ofrezca **Google Analytics**, **desactívalo**. No hace falta.
 5. Clic en **Crear proyecto** y espera medio minuto.
 
-**Cómo saber que va bien:** entras a una pantalla que dice *Hola [tu nombre]* y
-junto al nombre del proyecto, arriba, aparece una etiqueta **Plan Spark**. Eso
-confirma que estás en el plan gratuito y que no te van a cobrar nada.
+**Comprobación:** entras a una pantalla que dice *Hola [tu nombre]* y junto al
+nombre del proyecto aparece la etiqueta **Plan Spark**. Ese es el plan gratuito.
 
 ## Paso 2. Crear la base de datos
 
-1. En la barra lateral, dentro de **Categorías de producto**, haz clic en
-   **Bases de datos y almacenamiento** para desplegarla, y elige
-   **Firestore Database**.
-   *(Atajo: escribe `Firestore` en **Buscar productos**.)*
-2. Clic en **Crear base de datos**.
+En la barra lateral, dentro de **Categorías de producto**, despliega **Bases de
+datos y almacenamiento** y elige **Firestore Database**. Clic en **Crear base de
+datos**.
 
-Se abre un asistente de tres pasos.
+Se abre un asistente de tres pantallas.
 
 ### 2.1 — Seleccionar edición
 
-Te da a elegir entre **Edición Standard** y **Edición Enterprise**.
+Te ofrece **Edición Standard** y **Edición Enterprise**.
 
-**Deja Standard**, que ya viene marcada. Es la que necesita esta app y la que
-entra en el plan gratuito. Enterprise es para empresas con bases de datos
-enormes y no te sirve de nada aquí.
+**Deja Standard**, que ya viene marcada. Es la del plan gratuito. Enterprise es
+para empresas y no aporta nada aquí.
 
 Clic en **Siguiente**.
 
-### 2.2 — ID y ubicación de la base de datos
+### 2.2 — ID y ubicación
 
-⚠️ **Aquí está la trampa más peligrosa de todo el instructivo.**
+⚠️ **La trampa más peligrosa de toda la instalación.**
 
 Verás un campo **ID de la base de datos** con la palabra `(default)` en gris
-claro. Eso es un texto de ejemplo, no algo que hayas escrito.
+claro. **Eso es un texto de ejemplo: el campo está vacío y tiene que quedarse
+vacío.**
 
-**No escribas nada en ese campo. Déjalo completamente vacío.**
+Si escribes cualquier nombre ahí, la app nunca encontrará la base de datos.
+No verías un error claro, solo que nada se guarda. Y no se puede renombrar
+después: habría que crear otra desde cero.
 
-Si le pones un nombre, la app no encontrará la base de datos nunca y verás
-errores que no dicen por qué. Y no se puede renombrar después: habría que
-empezar de cero.
-
-En **Ubicación**, deja `nam5 (United States)`, que ya viene puesta. Verás un
-aviso naranja de que la ubicación no se puede cambiar después: es normal y
-`nam5` está bien.
+En **Ubicación** deja `nam5 (United States)`. El aviso naranja de que no se puede
+cambiar después es normal.
 
 Clic en **Siguiente**.
 
 ### 2.3 — Configurar
 
-Te da a elegir entre **Iniciar en modo de producción** y **Comenzar en modo de
-prueba**.
+Te ofrece **Iniciar en modo de producción** y **Comenzar en modo de prueba**.
 
 **Deja "Iniciar en modo de producción"**, que ya viene marcada.
 
-A la derecha verás un recuadro con código y un aviso que dice *"Se denegarán
-todas las operaciones de lectura y escritura de terceros"*. **Eso es correcto y
-es lo que queremos.** De momento todo está bloqueado; en el Paso 3 pones las
-reglas que dejan entrar a tu grupo.
+A la derecha verás un aviso de que *se denegarán todas las operaciones de lectura
+y escritura*. **Es correcto.** Ahora mismo la base está cerrada para todos,
+incluido tú; en el paso 3 la abres.
 
-> No elijas *modo de prueba*: deja la base de datos abierta a cualquiera durante
-> 30 días y luego se cierra sola de golpe, rompiendo la app sin avisar.
+> No elijas *modo de prueba*: deja la base abierta a cualquiera durante 30 días
+> y después se cierra sola de golpe, rompiendo la app sin avisar.
 
-Clic en **Crear** y espera unos segundos.
+Clic en **Crear**.
 
-## Paso 3. Poner las reglas de seguridad
+**Comprobación:** entras a una tabla vacía que dice que no hay datos.
 
-Ahora mismo tu base de datos está **bloqueada para todo el mundo**, incluido tú.
-Eso es lo que dejó el modo de producción. En este paso la abres solo para tu
-grupo.
+## Paso 3. Publicar las reglas de seguridad
 
-**No te lo saltes**, o la app no funcionará.
+Esto es lo que decide qué se puede escribir en tu base de datos. **Sin este paso
+la app no funciona.**
 
 1. Dentro de Firestore Database, arriba, entra a la pestaña **Reglas**.
-2. Verás un recuadro con texto. **Borra todo lo que hay dentro.**
-3. Abre el archivo `firestore.rules` que viene en la carpeta que descargaste
-   (se abre con el Bloc de notas o TextEdit), copia **todo** su contenido y
-   pégalo en ese recuadro.
+2. **Borra todo** lo que haya en el recuadro.
+3. Copia el bloque de aquí abajo entero y pégalo.
 4. Clic en **Publicar**.
 
-Si te sale un aviso en rojo, es que se copió mal. Vuelve a borrar todo y pega
-otra vez.
-
-## Paso 4. Copiar los datos de conexión
-
-1. En la barra lateral, clic en **Descripción general del proyecto** (la casita,
-   arriba del todo).
-2. En el centro de la pantalla, bajo el nombre del proyecto, clic en el botón
-   **+ Agregar app**.
-3. Te ofrece varios tipos de app. Elige el de **web**, que es el icono
-   **`</>`**.
-4. Ponle cualquier apodo, por ejemplo `cancha`. **No marques** la casilla de
-   Firebase Hosting.
-5. Clic en **Registrar app**.
-6. Aparecerá un bloque de texto. Busca la parte que empieza por
-   `const firebaseConfig = {` y **deja esta pestaña abierta**: vas a copiar
-   esos valores en el Paso 8.
-
-> Si ya cerraste esa pantalla, los datos siempre están en la barra lateral, en
-> **Configuración** → **Configuración del proyecto**, bajando hasta **Tus apps**.
-
-Se ve más o menos así:
-
 ```
-const firebaseConfig = {
-  apiKey: "AIzaSyB1c...",
-  authDomain: "padel-4f2a1.firebaseapp.com",
-  projectId: "padel-4f2a1",
-  storageBucket: "padel-4f2a1.firebasestorage.app",
-  messagingSenderId: "402918374652",
-  appId: "1:402918374652:web:8d3f..."
-};
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function tamanoSano() {
+      return request.resource.data.size() < 40;
+    }
+
+    match /players/{id} {
+      allow read: if true;
+      allow create, update: if tamanoSano();
+      allow delete: if false;
+    }
+
+    match /weeks/{wid} {
+      allow read: if true;
+      allow write: if wid.matches('^[0-9]{4}-W[0-9]{2}$');
+    }
+
+    match /sessions/{wid} {
+      allow read: if true;
+      allow write: if wid.matches('^[0-9]{4}-W[0-9]{2}$');
+    }
+
+    match /meta/{doc} {
+      allow read: if true;
+      allow write: if doc in ['payments', 'setup'] && tamanoSano();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
 ```
 
-> Esos datos **no son secretos**. Van dentro de la página y cualquiera puede
-> verlos; así funcionan todas las apps web con Firebase. Lo que protege tu
-> información son las reglas del Paso 3 y la lista de correos autorizados.
+**Comprobación:** aparece un mensaje de que las reglas se publicaron. Si sale
+algo en rojo, quedó texto viejo mezclado: borra todo otra vez y vuelve a pegar.
 
-> **Si algún menú no coincide con lo que lees aquí:** el buscador *Buscar
-> productos* de la barra lateral te lleva a cualquier sección por nombre. Y si
-> te quedas trabado, una captura de pantalla suele bastar para desatascarlo.
+> El archivo `firestore.rules` del proyecto es solo una copia de referencia. La
+> app no lo lee: las reglas que mandan son las que publicas aquí. En Windows ese
+> archivo no se abre con doble clic, pero no lo necesitas — el texto está arriba.
 
 ---
 
-# PARTE 2 — GitHub (donde vive la página)
+# PARTE 2 — GitHub
 
-## Paso 5. Crear el repositorio
+## Paso 4. Crear el repositorio
 
-Un "repositorio" es simplemente una carpeta de archivos en internet.
+Un repositorio es una carpeta de archivos alojada en internet.
 
 1. Entra a [github.com/new](https://github.com/new).
 2. En **Repository name** escribe el nombre que quieras, por ejemplo `padel-wb`.
-   Apúntalo: aparece en la dirección de tu app. La app detecta el nombre sola,
-   así que cualquiera funciona.
+   Apúntalo: aparece en la dirección de tu app. La app detecta el nombre sola.
 3. Elige **Public**.
-   > Tiene que ser público para que la publicación gratuita funcione. Solo se
-   > ve el código, nunca la información del grupo: eso vive en Firebase, detrás
-   > del inicio de sesión.
-4. **No marques** ninguna de las casillas de abajo (README, .gitignore, licencia).
+   > Tiene que ser público para que la publicación gratuita funcione. Solo se ve
+   > el código; la información del grupo vive en Firebase.
+4. **No marques** ninguna casilla de abajo (README, .gitignore, licencia).
 5. Clic en **Create repository**.
+6. Clonalo en tu computadora con **GitHub Desktop**.
 
-## Paso 6. Copiar los archivos al repositorio
+**Comprobación:** en GitHub Desktop, arriba a la izquierda aparece el nombre de
+tu repositorio.
 
-Como estás usando **GitHub Desktop** con el repositorio clonado en tu
-computadora, no hay que subir nada por el navegador: copias los archivos a una
-carpeta y GitHub Desktop se encarga.
+## Paso 5. Copiar los archivos
 
-### 6.1 — Abrir la carpeta del repositorio
+### 5.1 — Abrir la carpeta del repositorio
 
-1. Abre GitHub Desktop y asegúrate de que arriba a la izquierda está
-   seleccionado tu repositorio (`padel-wb`).
-2. Menú **Repository** → **Show in Explorer** (en Mac, *Show in Finder*).
-3. Se abre una carpeta que parece vacía. Es la correcta.
+En GitHub Desktop, menú **Repository** → **Show in Explorer** (en Mac, *Show in
+Finder*). Se abre una carpeta que parece vacía: es la correcta. Déjala abierta.
 
-Deja esa ventana abierta.
+### 5.2 — Hacer visibles los archivos ocultos
 
-### 6.2 — Hacer visibles los archivos ocultos
+⚠️ **No te saltes esto.** Entre los archivos hay una carpeta llamada
+**`.github`**. Al empezar por punto, Windows y Mac **la esconden**, y sin ella la
+página nunca se publica.
 
-⚠️ **No te saltes esto.** Los archivos que vas a copiar incluyen una carpeta
-llamada **`.github`**. Al empezar por un punto, Windows y Mac **la esconden**, y
-si no la copias, la página web nunca se publica y nada te avisará.
-
-- **Windows:** en el Explorador, pestaña **Vista** → marca **Elementos ocultos**.
+- **Windows:** Explorador → pestaña **Vista** → marca **Elementos ocultos**.
 - **Mac:** en Finder, pulsa `Cmd` + `Shift` + `.` (punto).
 
-Debería aparecer `.github` y `.gitignore`, en gris o algo transparentes.
+Deberían aparecer `.github`, `.gitignore` y `.gitattributes`, algo transparentes.
 
-### 6.3 — Copiar el contenido
+### 5.3 — Copiar el contenido
 
 1. Descomprime el archivo que descargaste.
 2. **Entra dentro** de la carpeta `padel` que aparece.
-3. Selecciona todo lo que hay dentro (`Ctrl`+`A`, o `Cmd`+`A` en Mac) y cópialo
-   (`Ctrl`+`C` / `Cmd`+`C`).
-4. Ve a la carpeta del repositorio que dejaste abierta y pega (`Ctrl`+`V` /
-   `Cmd`+`V`).
+3. Selecciona todo lo que hay dentro (`Ctrl`+`A`) y cópialo (`Ctrl`+`C`).
+4. Pégalo en la carpeta del repositorio (`Ctrl`+`V`).
 
-> **Copia el contenido, no la carpeta.** Si al terminar dentro del repositorio
-> ves una sola carpeta llamada `padel`, borra lo que pegaste y repite entrando
-> un nivel más.
+> **Copia el contenido, no la carpeta.** Si acabas viendo dentro del repositorio
+> una sola carpeta llamada `padel`, borra y repite entrando un nivel más.
 
-### 6.4 — Comprobar antes de continuar
+### 5.4 — Comprobar antes de seguir
 
-Vuelve a GitHub Desktop. En el panel de la izquierda, pestaña **Changes**,
-deberías ver una lista de unos 25 archivos.
+Vuelve a GitHub Desktop, panel **Changes**. Deberías ver unos 25 archivos.
 
-**Busca en esa lista `.github/workflows/deploy.yml`.**
+**Busca `.github/workflows/deploy.yml` en esa lista.**
 
-- Si está: perfecto, sigue.
-- Si **no** está: los archivos ocultos no estaban visibles. Vuelve al paso 6.2,
-  activa la opción y copia otra vez ese archivo.
+- Si está: sigue.
+- Si **no** está: los ocultos no estaban visibles. Vuelve al 5.2 y repite.
 
-Esta comprobación te ahorra el error más común y más difícil de diagnosticar.
+Esta comprobación evita el error más común y más difícil de diagnosticar.
 
-### 6.5 — Guardar y enviar
+### 5.5 — Guardar y enviar
 
-En GitHub Desktop, abajo a la izquierda:
+Abajo a la izquierda:
 
-1. En el recuadro **Summary**, escribe cualquier cosa, por ejemplo
-   `primera version`.
-2. Clic en el botón azul **Commit to main**.
-
-Y ahora lo importante:
-
+1. En **Summary** escribe cualquier cosa, por ejemplo `primera version`.
+2. Clic en **Commit to main**.
 3. Arriba, clic en **Push origin**.
 
-⚠️ **Hacer *Commit* no envía nada a internet.** Solo guarda el cambio en tu
-computadora. Hasta que no toques **Push origin**, GitHub sigue viendo el
-repositorio vacío y la página no se publica. Es el fallo más frecuente de quien
-empieza con GitHub Desktop.
+⚠️ **Commit no envía nada a internet.** Solo guarda en tu computadora. Hasta que
+no toques **Push origin**, GitHub sigue viendo el repositorio vacío. Es el fallo
+más frecuente con GitHub Desktop.
 
-**Cómo saber que va bien:** el botón deja de decir *Push origin* y, si recargas
-la página del repositorio en el navegador, ves todos los archivos.
+> Si aparece el aviso *"This diff contains a change in line endings from 'LF' to
+> 'CRLF'"*, ignóralo. Es cosmético y no afecta a nada.
 
-## Paso 7. Activar la publicación
+**Comprobación:** recarga la página del repositorio en el navegador y ves todos
+los archivos.
 
-1. En tu repositorio, arriba, pestaña **Settings**.
-2. Menú de la izquierda, **Pages**.
-3. En **Source**, cambia el desplegable a **GitHub Actions**.
+## Paso 6. Activar la publicación
 
-No hay que guardar nada, se aplica solo.
+1. En tu repositorio, pestaña **Settings**.
+2. Menú izquierdo, **Pages**.
+3. En **Source**, elige **GitHub Actions**.
 
-## Paso 8. Pegar los datos de Firebase
+No hay que guardar, se aplica solo.
 
-Como tienes el repositorio en tu computadora, edita el archivo ahí mismo.
+## Paso 7. Esperar a que se publique
 
-1. Abre la carpeta del repositorio (GitHub Desktop → **Repository** →
-   **Show in Explorer**).
-2. Entra a la carpeta **`src`** y busca el archivo **`config.js`**.
-3. Ábrelo con un editor de **texto plano**:
-   - **Windows:** clic derecho → *Abrir con* → **Bloc de notas**.
-   - **Mac:** clic derecho → *Abrir con* → **TextEdit**.
+1. Pestaña **Actions**. Verás un círculo amarillo girando.
+2. Espera 1–2 minutos a que se ponga **verde ✓**.
+3. Tu app está en `https://TU_USUARIO.github.io/NOMBRE_DEL_REPO/`
 
-   > No lo abras con Word ni con Páginas: añaden formato invisible que rompe el
-   > archivo.
-
-4. Verás seis líneas con `"PEGA_AQUI..."`. Reemplaza cada una por el valor que
-   corresponda, de la pestaña de Firebase que dejaste abierta en el Paso 4.
-
-   **Mantén las comillas y las comas.** Solo cambias lo que está *dentro* de las
-   comillas.
-
-   Debe quedar así (con tus valores, no estos):
-
-   ```js
-   export const firebaseConfig = {
-     apiKey: "AIzaSyB1c...",
-     authDomain: "padel-wb-4f2a1.firebaseapp.com",
-     projectId: "padel-wb-4f2a1",
-     storageBucket: "padel-wb-4f2a1.firebasestorage.app",
-     messagingSenderId: "402918374652",
-     appId: "1:402918374652:web:8d3f...",
-   };
-   ```
-
-5. Guarda el archivo (`Ctrl`+`S` / `Cmd`+`S`) y ciérralo.
-
-> Si GitHub Desktop te muestra el aviso **"This diff contains a change in line
-> endings from 'LF' to 'CRLF'"**, ignóralo. Es solo la forma en que Windows
-> marca el final de cada línea; no afecta a la app. Puedes hacer *Commit* y
-> *Push* con total tranquilidad.
-
-### Enviar el cambio
-
-Vuelve a GitHub Desktop:
-
-1. En **Changes** debería aparecer `src/config.js`. Si haces clic, ves en verde
-   y rojo lo que cambiaste: comprueba que no quedó ningún `PEGA_AQUI`.
-2. En **Summary** escribe `datos de firebase`.
-3. Clic en **Commit to main**.
-4. Clic en **Push origin**. ← otra vez, sin esto no llega a internet.
-
-## Paso 9. Esperar a que se publique
-
-1. Pestaña **Actions** de tu repositorio.
-2. Verás una línea con un círculo amarillo girando. Espera 1–2 minutos hasta
-   que se ponga **verde ✓**.
-3. Tu app ya está en:
-
-   ```
-   https://TU_USUARIO.github.io/NOMBRE_DEL_REPO/
-   ```
-
-   Se arma con tu usuario de GitHub y el nombre que le pusiste al repositorio.
-   Por ejemplo, si tu usuario es `samjvera` y el repositorio `padel-wb`:
+   Por ejemplo, usuario `samjvera` y repositorio `padel-wb`:
 
    ```
    https://samjvera.github.io/padel-wb/
    ```
 
-   **La barra del final hace falta.** Sin ella puede que veas un error 404.
+   **La barra del final hace falta.**
 
-Si sale una **✗ roja**, ve a *Si algo falla* al final.
+Si sale una **✗ roja**, mira *Si algo falla* al final.
 
-# PARTE 3 — Crear el grupo
+---
 
-## Paso 10. La primera vez
+# PARTE 3 — Empezar a usarla
 
-1. Abre tu app en el celular o la computadora.
-2. Aparece la pantalla **Crea tu grupo**, con los ocho nombres ya escritos.
-   Cámbialos si hace falta.
-3. Marca **M** o **F** en cada uno. Solo los marcados con M entran en la
-   rotación de pago.
-4. Abajo, ordena con las flechas ↑↓ a quién le toca pagar primero.
-5. Clic en **Crear el grupo**.
+## Paso 8. Crear el grupo
 
-Después te pregunta **¿Cómo te llamas?**. Escribe tu nombre o tócalo en la lista
-de abajo. Queda guardado en ese teléfono; no lo vuelve a preguntar.
+Abre la app. La primera vez aparece **Crea tu grupo**:
 
-Si te equivocas, toca tu nombre arriba a la derecha y vuelves a escribirlo.
+1. Los ocho nombres vienen ya escritos. Cámbialos si hace falta.
+2. Marca **M** o **F** en cada uno. Solo los M entran en la rotación de pago.
+3. Con las flechas ↑↓ ordena a quién le toca pagar primero.
+4. Clic en **Crear el grupo**.
 
-> Esta pantalla de configuración solo aparece una vez. En cuanto creas el grupo,
-> nadie la vuelve a ver.
+Después te pregunta tu nombre. Escríbelo y quedas dentro.
 
-## Paso 11. Pasarles el enlace a los demás
+> Esta pantalla solo aparece una vez. Nadie más la verá.
 
-Mándales la dirección por el grupo de WhatsApp:
+## Paso 9. Repartir el enlace
 
-```
-https://samjvera.github.io/padel-wb/
-```
+Manda la dirección por el grupo de WhatsApp. Cada uno la abre, **escribe su
+nombre**, y ya está. Sin instalar nada, sin registrarse, sin contraseñas.
 
-Cada uno la abre, **escribe su nombre**, y ya está. No hay que instalar nada, no
-hay que registrarse y no hay contraseñas.
+Da igual si escriben `Ricardo`, `ricardo` o `RICARDO`: la app los reconoce como
+la misma persona, y también ignora los acentos (`Matías` = `Matias`).
 
-Si el nombre ya existe, entra como esa persona. Si es nuevo —un amigo que se
-apunta esa semana— se añade solo, como invitado. Da igual si escribe `Ricardo`,
-`ricardo` o `RICARDO`: la app los reconoce como el mismo.
+Si alguien escribe un nombre nuevo —un amigo que se apunta esa semana— se añade
+solo como invitado, fuera de la rotación de pago.
 
-Diles que **la guarden en la pantalla de inicio** para tenerla a mano: en el
-navegador del celular, menú → *Añadir a pantalla de inicio*.
+Diles que la guarden en la pantalla de inicio del celular: navegador → menú →
+*Añadir a pantalla de inicio*.
+
+---
 
 # Cómo se usa cada semana
 
-**Cada lunes a las 8:00 de la mañana, hora de Caracas**, la app pasa sola a una
-semana nueva: la cuadrícula queda en blanco y se puede volver a organizar. No
-hace falta que nadie haga nada, ni hay ningún servidor detrás: cada teléfono lo
-calcula por su cuenta, así que todos ven el cambio en el mismo instante aunque
-estén en países distintos.
+**El reinicio.** Cada lunes a las 8:00 AM hora de Caracas, la app pasa sola a una
+semana nueva y la cuadrícula queda en blanco. No hace falta que nadie haga nada
+ni hay servidor detrás: cada teléfono lo calcula por su cuenta, así que todos ven
+el cambio en el mismo instante aunque estén en países distintos. Arriba siempre
+dice cuánto falta. Lo de la semana anterior queda guardado.
 
-Debajo del nombre de la semana, arriba, siempre dice cuánto falta para el
-próximo reinicio.
+**Pestaña Semana.** Cada quien toca las casillas de día y horario en que puede.
+El número de la casilla es cuánta gente puede a esa hora. Cuando hay un horario
+claro, cualquiera toca **Fijar este día**: eso congela la lista de los que juegan
+y asigna quién paga.
 
-La semana anterior no se borra: queda guardada en Firestore por si algún día
-quieren consultarla.
+**Pestaña Partido.** Toca **Armar americano** y sale el cuadro: quién juega con
+quién en cada ronda, dibujado sobre una cancha. Anotas los puntos de un equipo y
+el del otro se calcula solo. La tabla se ordena en vivo.
 
-**Lunes — pestaña Semana.** Cada quien toca las casillas de los días y horarios
-en que puede. El número dentro de cada casilla es cuánta gente puede a esa hora.
-Cuando ya hay un horario claro, cualquiera toca **Fijar este día**: eso congela
-la lista de los que juegan y asigna a quién le toca pagar.
+Antes de armar el cuadro puedes añadir invitados. No entran en la rotación de pago.
 
-**Día del partido — pestaña Partido.** Toca **Armar americano** y aparece el
-cuadro: quién juega con quién en cada ronda, dibujado sobre una cancha. Después
-de cada ronda escribes los puntos de un equipo y el del otro se calcula solo.
-La tabla se ordena en vivo.
+**Pestaña Pagos.** A quién le toca esta semana y la cola completa. Cuando pague,
+tocan **Marcar como pagado**.
 
-Antes de armar el cuadro puedes **añadir invitados**. Los invitados no entran
-en la rotación de pago.
+## No hay avisos automáticos
 
-**Pestaña Pagos.** Muestra a quién le toca esta semana y la cola completa.
-Cuando pague, tocan **Marcar como pagado**.
+Es una decisión, no un olvido. La app no le escribe a nadie nunca.
 
-## La app no manda avisos
-
-Es una decisión, no un olvido. No hay bot, ni correos, ni notificaciones: la
-app no le escribe a nadie nunca.
-
-En su lugar, en las pestañas *Semana* y *Partido* hay un botón **Copiar mensaje
-para el grupo**. Arma el texto solo —qué horario va ganando, quién falta por
-marcar, o la alineación y quién paga— y lo deja copiado para que lo pegues en
+En su lugar, en *Semana* y *Partido* hay un botón **Copiar mensaje para el
+grupo**: arma el texto con el estado actual —qué horario va ganando, quién falta
+por marcar, o la alineación y quién paga— y lo deja copiado para pegarlo en
 WhatsApp.
 
-Y al fijar la noche, **Añadir al calendario** baja el evento al calendario del
-teléfono, con avisos 3 horas y 30 minutos antes.
+Al fijar la noche, **Añadir al calendario** baja el evento al teléfono con avisos
+3 horas y 30 minutos antes.
 
-**Lo que esto significa:** si nadie abre la app, nadie se entera. Alguien del
-grupo tiene que acordarse el lunes de tocar *Copiar mensaje* y pegarlo.
+**Lo que implica:** si nadie abre la app, nadie se entera. Alguien tiene que
+acordarse el lunes de copiar el mensaje y pegarlo en el grupo.
 
 ---
 
@@ -426,145 +333,136 @@ grupo tiene que acordarse el lunes de tocar *Copiar mensaje* y pegarlo.
 
 | Lo que ves | Qué pasa | Cómo se arregla |
 |---|---|---|
-| **Falta conectar Firebase** | El Paso 8 no se guardó | Vuelve a `src/config.js` en GitHub y revisa que no quede ningún `PEGA_AQUI` |
-| Te pregunta el nombre cada vez que abres | Borraste los datos del navegador, o estás en modo incógnito | Escríbelo otra vez. En incógnito no se puede guardar nada |
+| **Firestore está bloqueado** | Las reglas del Paso 3 no se publicaron | Firestore → Reglas → pega otra vez → Publicar |
+| **Falta conectar Firebase** | `src/config.js` tiene `PEGA_AQUI` | Mira *Cambiar de proyecto de Firebase* abajo |
+| Página en blanco o error 404 | No terminó de publicarse, o la dirección está mal | Espera el ✓ verde en Actions. Revisa usuario, nombre del repositorio y la **barra final** |
+| **✗ roja** en Actions | Falta la carpeta `.github`, o copiaste la carpeta en vez de su contenido | Repite el Paso 5 con los ocultos visibles |
+| Cambias algo y no pasa nada en GitHub | Hiciste *Commit* pero no *Push origin* | Clic en **Push origin** |
+| Se queda en *Cargando…* | Las reglas no están publicadas | Igual que la primera fila |
+| Te pregunta el nombre cada vez | Borraste datos del navegador, o estás en incógnito | Escríbelo otra vez. En incógnito no se guarda nada |
 | Escribiste mal tu nombre | — | Toca tu nombre arriba a la derecha y vuelve a escribirlo |
-| Aparecen dos personas casi iguales (`Matias` y `Matías`) | Alguien lo escribió con acento | En Firestore → `players`, pon `active: false` en la sobrante |
-| La semana no cambió el lunes | Tenías la app abierta desde antes | Recarga la página; si está abierta, cambia sola en menos de un minuto |
-| Página en blanco o error 404 | La publicación no terminó, o la dirección está mal escrita | Pestaña Actions: espera el ✓ verde. Si ya está verde, revisa que la dirección lleve tu usuario, el nombre exacto del repositorio, y la **barra final** |
-| **✗ roja** en Actions | Casi siempre falta la carpeta `.github`, o se copió la carpeta entera en vez de su contenido | Repite el Paso 6 con los archivos ocultos visibles |
-| Hiciste cambios pero en GitHub no aparecen, o la pestaña Actions no se mueve | Hiciste *Commit* pero no *Push origin* | En GitHub Desktop, clic en **Push origin** arriba |
-| **This diff contains a change in line endings from 'LF' to 'CRLF'** | Tu editor de Windows guardó los saltos de línea a la manera de Windows | Es inofensivo, no rompe nada. Haz *Commit* y *Push* normalmente |
-| GitHub Desktop dice *"No local changes"* después de copiar | Pegaste los archivos en otra carpeta | Repository → Show in Explorer para abrir la carpeta correcta y pega ahí |
-| **Missing or insufficient permissions** | Las reglas del Paso 3 no se publicaron | Firestore → Reglas → pega otra vez → Publicar |
-| Todo parece bien pero nada se guarda, o errores raros sin explicación | Le pusiste nombre a la base de datos en el Paso 2.2 | En Firestore, si tu base de datos **no** se llama `(default)`, hay que crear otra dejando el campo de ID vacío |
-| Se queda en *Cargando…* | Igual que la anterior | Igual que la anterior |
-| El botón *Copiar* no copia | Safari a veces lo bloquea | La app muestra el texto abajo; selecciónalo y cópialo a mano |
+| Aparecen dos personas casi iguales | Alguien lo escribió distinto | En Firestore → `players`, pon `active: false` en la sobrante |
+| La semana no cambió el lunes | Tenías la app abierta desde antes | Recarga; si está abierta cambia sola en menos de un minuto |
+| Aviso de *line endings LF/CRLF* | Tu editor de Windows guardó a la manera de Windows | Inofensivo. Commit y push normalmente |
+| El botón *Copiar* no copia | Safari a veces lo bloquea | La app muestra el texto abajo; selecciónalo y cópialo |
 
-**Regla de oro con GitHub Desktop:** cada vez que cambies algo son siempre tres
-pasos — guardar el archivo, **Commit to main**, y **Push origin**. Si te saltas
-el último, no pasa nada en internet.
+**Regla de oro con GitHub Desktop:** cada cambio son tres pasos — guardar el
+archivo, **Commit to main**, **Push origin**. Si te saltas el último no pasa nada.
 
-Después de un *Push*, espera 1–2 minutos a que la pestaña *Actions* se ponga en
-verde y **recarga la página** de tu app. Si sigues viendo lo viejo, recarga
-forzando: `Ctrl`+`F5` o `Cmd`+`Shift`+`R`.
+Tras un push, espera 1–2 minutos al ✓ verde y recarga forzando: `Ctrl`+`F5`.
 
 ---
 
-# Cambiar personas después
+# Mantenimiento
 
-Se hace en Firebase → **Firestore Database** → pestaña **Datos**, dentro de la
-colección `players`.
+## Actualizar la app a una versión nueva
 
-**Cambiar un nombre:** clic en la persona → doble clic en el campo `name` →
-escríbelo → **Actualizar**.
+Copia el contenido encima como en el Paso 5, y **Commit** + **Push**.
 
-**Sacar a alguien del grupo:** clic en la persona → cambia el campo `active` de
-`true` a `false`. Deja de aparecer en las listas, pero se conserva su historial
-de pagos. Sirve también para limpiar nombres duplicados.
+⚠️ **`src/config.js` es el único archivo con datos tuyos.** Antes de hacer commit,
+ábrelo y comprueba que sigue teniendo tu `projectId` y no la palabra `PEGA_AQUI`.
+Todo lo demás se puede sobrescribir sin pensar.
 
-**Convertir un invitado en miembro fijo:** cambia su campo `isGuest` a `false` y
-asegúrate de que tenga `gender` con valor `M` o `F`. Si es hombre y quieres que
-pague su turno, añádelo además a `meta` → `payments` → `order`.
+## Cambiar de proyecto de Firebase
 
-**Añadir a alguien nuevo:** dentro de `players`, **Agregar documento**. En *ID
-del documento* pon su nombre en minúsculas y sin acentos ni espacios (por
-ejemplo `carlos`), y añade estos campos:
+Abre `src/config.js` con el **Bloc de notas** (no con Word: añade formato
+invisible que rompe el archivo) y reemplaza los seis valores por los del proyecto
+nuevo. Los encuentras en Firebase → **Descripción general del proyecto** →
+**+ Agregar app** → icono `</>` , o si ya la registraste, en **Configuración** →
+**Configuración del proyecto** → **Tus apps**.
 
-| Campo | Tipo | Valor |
-|---|---|---|
-| `name` | string | `Carlos` |
-| `gender` | string | `M` o `F` |
-| `isGuest` | boolean | `false` |
-| `active` | boolean | `true` |
+Mantén las comillas y las comas; solo cambia lo de dentro. Luego **Commit** y
+**Push**.
 
-Si es hombre y quieres que entre en la rotación de pago, ve además a la
-colección `meta` → documento `payments` → campo `order`, y añade su
-identificador a la lista.
+## Cambiar personas
 
-> Para invitados de una noche no hace falta nada de esto: se añaden desde la
-> propia app, en la pestaña *Partido*.
+En Firebase → **Firestore Database** → pestaña **Datos** → colección `players`.
+
+- **Cambiar un nombre:** doble clic en el campo `name` → **Actualizar**.
+- **Sacar a alguien:** cambia `active` de `true` a `false`. Desaparece de las
+  listas pero conserva su historial. Sirve también para limpiar duplicados.
+- **Convertir un invitado en miembro fijo:** pon `isGuest` en `false` y añade
+  `gender` con valor `M` o `F`. Si es hombre y quieres que pague su turno,
+  añádelo además a `meta` → `payments` → `order`.
+
+Para invitados de una noche no hace falta nada: se añaden desde la app.
+
+---
 
 # Cosas que conviene saber
 
 ## Ocho personas en una cancha se sientan mucho
 
-La app lo permite, pero mide mal. Con 8 rondas de 16 puntos, cada persona juega
-4 y se sienta 4, y **12 de las 28 parejas posibles nunca llegan a jugar juntas**.
+La app lo permite, pero mide mal. Con 8 rondas de 16 puntos cada uno juega 4 y se
+sienta 4, y **12 de las 28 parejas posibles nunca llegan a jugar juntas**.
 
-Estos son los números reales del generador, con una cancha:
+Números reales del generador, con una cancha:
 
 | Jugadores | Rondas | Partidos c/u | Parejas que nunca se forman |
 |---|---|---|---|
 | 4 | 6 | 6 | 0 de 6 |
 | 5 | 5 | 4 | 0 de 10 |
 | 6 | 8 | 5–6 | 0 de 15 |
-| 7 | 8 | 4–5 | 5 de 21 |
+| 7 | 8 | 4–5 | 0 de 21 |
 | 8 | 8 | 4 | **12 de 28** |
 
 **Cinco y seis jugadores son el punto dulce de una cancha.** Con 5 sale un
 americano perfecto: cada uno se sienta exactamente una vez y juega con cada uno
 de los demás exactamente una vez.
 
-Si algún día consiguen **dos canchas**, 8 jugadores en 7 rondas es perfecto:
-todos juegan todas las rondas y cada pareja se forma una vez.
+Con **dos canchas**, 8 jugadores en 7 rondas también es perfecto.
 
 ## Los puntos M+
 
-Cuando unos juegan más rondas que otros, a quien jugó menos se le suman 8
-puntos por cada ronda que se perdió (la mitad de los 16 que reparte un partido).
-Es el estándar y evita que el marcador castigue a quien le tocó descansar más.
+Cuando unos juegan más rondas que otros, a quien jugó menos se le suman 8 puntos
+por cada ronda perdida: la mitad de los 16 que reparte un partido. Evita que el
+marcador castigue a quien le tocó descansar más.
 
 ## La columna Diff no desempata
 
-Con puntos fijos por partido, la diferencia sale siempre de los puntos y los
-partidos jugados. Dos personas con los mismos puntos y los mismos partidos
-tienen forzosamente la misma diferencia. Por eso el desempate real es **quién
-ganó más partidos**, y eso es lo que ordena la tabla.
+Con puntos fijos por partido, la diferencia se deduce de los puntos y los
+partidos jugados. Dos personas con los mismos puntos y los mismos partidos tienen
+forzosamente la misma diferencia. Por eso el desempate real es **quién ganó más
+partidos**, y así se ordena la tabla.
 
 ## Quién paga
 
-Paga siempre **quien menos veces ha pagado**, y si hay empate, el que esté antes
-en el orden que definiste. Si te toca y no vas, no pierdes el turno: te quedas
-arriba hasta que juegues.
+Paga **quien menos veces ha pagado**; si hay empate, el que esté antes en el orden
+que definiste. Si te toca y no vas, no pierdes el turno: sigues arriba hasta que
+juegues.
 
-Las mujeres y los invitados no entran en el cálculo. Si una noche solo confirman
-mujeres e invitados, la app lo dice y nadie avanza en la cola.
+Mujeres e invitados quedan fuera del cálculo. Si una noche solo confirman mujeres
+e invitados, la app lo dice y nadie avanza en la cola.
 
 ## Cualquiera con el enlace puede entrar
 
-No hay contraseñas, ni cuentas, ni lista de correos. Quien tenga la dirección
-abre la app, escribe su nombre y puede hacer de todo. Es lo más cómodo para un
-grupo de amigos, pero conviene que sepas qué implica.
+No hay contraseñas ni cuentas. Quien tenga la dirección abre, escribe su nombre y
+puede hacer de todo, incluido entrar con el nombre de otro. Entre amigos suele dar
+igual, pero conviene saberlo.
 
-**El riesgo real:** tu repositorio de GitHub es público, así que la dirección de
-tu base de datos se puede encontrar. Existen robots que rastrean GitHub buscando
-bases de datos abiertas. Si alguno da con la tuya, podría leer los nombres y los
-marcadores, o intentar llenarla de basura.
+**El riesgo real:** tu repositorio es público, así que la dirección de la base de
+datos se puede encontrar, y existen robots que rastrean GitHub buscando bases
+abiertas. Si alguno da con la tuya podría leer los nombres y marcadores, o
+intentar ensuciarla.
 
-**Lo que NO puede pasar:** no hay riesgo de que te cobren. El plan Spark no tiene
-tarjeta asociada; si se superara la cuota gratuita, la app dejaría de funcionar
-hasta el día siguiente, pero nadie paga nada.
+**Lo que no puede pasar:** que te cobren. El plan Spark no tiene tarjeta; si se
+superara la cuota gratuita la app dejaría de funcionar hasta el día siguiente,
+nada más.
 
-**Lo que hacen las reglas para limitarlo.** Aunque cualquiera pueda escribir, las
-reglas restringen *qué* se puede escribir:
+**Lo que limitan las reglas:** los jugadores no se pueden borrar, solo se aceptan
+semanas con formato válido, los documentos tienen límite de tamaño y cualquier
+ruta que la app no use está cerrada. Eso convierte "pueden destruirte la base" en
+"pueden ensuciar unas semanas concretas".
 
-- Los jugadores no se pueden borrar, solo desactivar.
-- Solo se aceptan semanas con el formato correcto (`2026-W31`), así que no se
-  pueden crear documentos inventados.
-- Los documentos tienen un límite de tamaño.
-- Cualquier ruta que la app no use está cerrada.
-
-**Si algún día quieres cerrarlo de verdad,** la forma sería volver a activar el
-inicio de sesión con Google y una lista de correos autorizados. Se puede añadir
-después sin rehacer nada.
+Si algún día quieres cerrarlo de verdad, se puede añadir inicio de sesión con
+Google y lista de correos sin rehacer nada.
 
 ## Todos mandan igual
 
-No hay administradores. Cualquiera puede fijar el día, reabrir la semana o
-marcar un pago. Entre amigos, los permisos suelen estorbar más que ayudar.
+No hay administradores. Cualquiera puede fijar el día, reabrir la semana o marcar
+un pago. Entre amigos, los permisos estorban más que ayudan.
 
 ## La app organiza, no reserva
 
-Alguien tiene que reservar la cancha en el club a mano. Los clubes casi nunca
-dejan que otras apps reserven por ellos.
+Alguien tiene que reservar la cancha en el club. Los clubes casi nunca permiten
+que otras apps reserven por ellos.

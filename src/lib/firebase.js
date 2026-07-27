@@ -53,7 +53,7 @@ export async function unirse(nombre, players) {
 export function addGuest(name, gender) {
   const id = `inv_${Date.now().toString(36)}`;
   return setDoc(doc(db, 'players', id), {
-    name: name.trim(), gender, isGuest: true, active: true, email: null,
+    name: name.trim(), gender, isGuest: true, active: true,
   }).then(() => id);
 }
 

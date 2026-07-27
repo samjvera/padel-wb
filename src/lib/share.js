@@ -1,7 +1,7 @@
 // Sin avisos automáticos, alguien pega el enlace en el grupo.
 // Que al menos no tenga que escribir el mensaje.
 
-import { DIAS, SLOTS, rankSlots, whoIsIn } from './week';
+import { DIAS, SLOTS, rankSlots } from './week';
 
 export function textoSemanaAbierta(week, players, url) {
   const av = week.availability || {};
