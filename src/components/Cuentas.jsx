@@ -1,124 +1,96 @@
 import { useState } from 'react';
-import { saldos, liquidar, cuadra, nochesCubiertas, nuevoId } from '../lib/ledger';
+import { deudas, repartir, nuevoId } from '../lib/ledger';
 import { colaDePago } from '../lib/payments';
 import { guardarLedger } from '../lib/firebase';
 
 const dinero = n => `$${Math.abs(n).toFixed(2).replace(/\.00$/, '')}`;
+const hoy = () => new Date().toISOString().slice(0, 10);
+const aFecha = s => new Date(s + 'T12:00:00').getTime();
+const deFecha = t => new Date(t).toISOString().slice(0, 10);
 
 export default function Cuentas({ ledger, players, pagos }) {
   const [abrir, setAbrir] = useState(null);
   const mov = ledger?.movimientos || [];
   const costo = ledger?.costoNoche ?? 20;
+  const n = id => players[id]?.name ?? id;
 
-  const ids = Object.values(players).filter(p => p.active !== false).map(p => p.id);
-  const s = saldos(mov, ids);
-  const cuentas = liquidar(s);
-  const ok = cuadra(s);
-  const cubiertas = nochesCubiertas(mov, costo);
-
-  const conSaldo = ids.map(id => ({ id, v: s[id] || 0 }))
-    .filter(x => Math.abs(x.v) > 0.005)
-    .sort((a, b) => b.v - a.v);
-
-  const guardar = async nuevos => guardarLedger({ costoNoche: costo, movimientos: nuevos });
-  const anadir = m => guardar([{ ...m, id: nuevoId(), fecha: Date.now() }, ...mov]);
+  const d = deudas(mov);
+  const guardar = nuevos => guardarLedger({ costoNoche: costo, movimientos: nuevos });
+  const anadir = m => guardar([{ ...m, id: nuevoId() }, ...mov]);
   const borrar = id => guardar(mov.filter(m => m.id !== id));
 
   return (
     <section className="space-y-5">
       <header>
         <p className="t-eyebrow">Cuentas</p>
-        <h2 className="t-display text-3xl mt-1">Quién debe qué</h2>
+        <h2 className="t-display text-3xl mt-1">Quién le debe a quién</h2>
       </header>
 
-      {!ok && (
-        <div className="panel p-4 border-flood/60">
-          <p className="text-sm text-flood">
-            Los saldos no suman cero. Falta registrar algún movimiento o hay uno mal metido.
+      <div className="panel p-4">
+        {d.lista.length === 0 ? (
+          <p className="t-display text-xl">Nadie debe nada</p>
+        ) : (
+          <ul className="space-y-1">
+            {d.lista.map((x, i) => (
+              <li key={i} className="flex items-center gap-2 py-2.5 border-b border-glass/25 last:border-0">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm">
+                    <b>{n(x.de)}</b>
+                    <span className="text-line/40"> le debe a </span>
+                    <b>{n(x.a)}</b>
+                  </p>
+                  {x.motivos.length > 0 && (
+                    <p className="t-num text-xs text-line/40 truncate">
+                      {x.motivos.join(' · ')}
+                    </p>
+                  )}
+                </div>
+                <span className="t-num text-flood font-semibold">{dinero(x.monto)}</span>
+                <button className="chip px-2 text-xs"
+                  title="Ya pagó"
+                  onClick={() => anadir({ tipo: 'traspaso', quien: x.de, para: x.a,
+                    monto: x.monto, fecha: Date.now() })}>✓</button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {d.sinPagar > 0.005 && (
+          <p className="text-xs text-flood mt-3">
+            Quedan {dinero(d.sinPagar)} de cancha sin poner. Alguien tiene que llevar dinero.
           </p>
-        </div>
-      )}
-
-      {/* Liquidación */}
-      <div className="panel p-4">
-        <p className="t-eyebrow">Para quedar en paz</p>
-        {cuentas.length === 0 ? (
-          <p className="t-display text-xl mt-2">Todo cuadrado</p>
-        ) : (
-          <ul className="mt-3 space-y-2">
-            {cuentas.map((c, i) => (
-              <li key={i} className="flex items-center gap-2 py-2 border-t border-glass/25">
-                <span className="flex-1 text-sm">
-                  <b>{players[c.de]?.name}</b>
-                  <span className="text-line/40"> le paga a </span>
-                  <b>{players[c.a]?.name}</b>
-                </span>
-                <span className="t-num text-flood font-semibold">{dinero(c.monto)}</span>
-                <button
-                  className="chip px-2 text-xs"
-                  onClick={() => anadir({ tipo: 'traspaso', quien: c.de, para: c.a, monto: c.monto })}
-                  title="Marcar como pagado"
-                >✓</button>
-              </li>
-            ))}
-          </ul>
         )}
-        <p className="text-xs text-line/45 mt-3">
-          Es el mínimo de transferencias para que nadie deba nada. Toca ✓ cuando alguien pague.
-        </p>
-      </div>
-
-      {/* Saldos */}
-      <div className="panel p-4">
-        <p className="t-eyebrow">Saldo de cada uno</p>
-        {conSaldo.length === 0 ? (
-          <p className="text-sm text-line/55 mt-2">Nadie debe nada.</p>
-        ) : (
-          <ul className="mt-2">
-            {conSaldo.map(({ id, v }) => (
-              <li key={id} className="flex items-center justify-between py-2 border-t border-glass/25">
-                <span className="text-sm">{players[id]?.name}</span>
-                <span className={`t-num text-sm ${v > 0 ? 'text-flood' : 'text-line/50'}`}>
-                  {v > 0 ? `le deben ${dinero(v)}` : `debe ${dinero(v)}`}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-        {cubiertas > 0.01 && (
-          <p className="text-xs text-line/45 mt-3">
-            El grupo lleva {cubiertas.toFixed(1)} noche{cubiertas >= 2 ? 's' : ''} pagada
-            {cubiertas >= 2 ? 's' : ''} por adelantado.
+        {d.sobrante > 0.005 && (
+          <p className="text-xs text-line/50 mt-3">
+            Hay {dinero(d.sobrante)} a favor del grupo
+            {costo > 0 && ` — cubre ${(d.sobrante / costo).toFixed(1)} noches más`}.
           </p>
         )}
       </div>
 
       <div className="court-rule" />
 
-      {/* Registrar */}
       <div className="grid grid-cols-2 gap-2">
         <button className="btn btn-flood text-sm" onClick={() => setAbrir('pago')}>
-          Pagó la cancha
+          Alguien puso dinero
         </button>
-        <button className="btn btn-ghost text-sm" onClick={() => setAbrir('traspaso')}>
-          Le pagó a alguien
+        <button className="btn btn-ghost text-sm" onClick={() => setAbrir('cargo')}>
+          Registrar noche
         </button>
       </div>
-      <button className="btn btn-ghost w-full text-sm" onClick={() => setAbrir('cargo')}>
-        Registrar una noche
+      <button className="btn btn-ghost w-full text-sm" onClick={() => setAbrir('traspaso')}>
+        Alguien le devolvió a otro
       </button>
 
       {abrir && (
-        <Formulario
-          tipo={abrir} players={players} costo={costo} pagos={pagos}
+        <Formulario tipo={abrir} players={players} costo={costo} pagos={pagos}
           onCerrar={() => setAbrir(null)}
-          onGuardar={m => { anadir(m); setAbrir(null); }}
-        />
+          onGuardar={m => { anadir(m); setAbrir(null); }} />
       )}
 
+      <Reparto mov={mov} n={n} />
       <Ajustes costo={costo} onCambiar={c => guardarLedger({ costoNoche: c, movimientos: mov })} />
-
-      <Movimientos mov={mov} players={players} onBorrar={borrar} />
+      <Movimientos mov={mov} n={n} onBorrar={borrar} />
     </section>
   );
 }
@@ -131,40 +103,47 @@ function Formulario({ tipo, players, costo, pagos, onCerrar, onGuardar }) {
   const [quien, setQuien] = useState(tipo === 'cargo' ? (sugerido ?? gente[0]?.id) : gente[0]?.id);
   const [para, setPara] = useState(gente[1]?.id);
   const [monto, setMonto] = useState(tipo === 'cargo' ? String(costo) : '');
-  const [nota, setNota] = useState('');
+  const [fecha, setFecha] = useState(hoy());
 
-  const titulo = { pago: 'Alguien pagó la cancha', traspaso: 'Alguien le pagó a otro',
-    cargo: 'Registrar una noche' }[tipo];
+  const titulo = { pago: 'Alguien puso dinero', traspaso: 'Devolución entre dos personas',
+    cargo: 'Registrar una noche de cancha' }[tipo];
+  const etiqueta = { pago: 'Quién puso el billete', traspaso: 'Quién devuelve',
+    cargo: 'A quién le tocaba esa noche' }[tipo];
   const valido = quien && Number(monto) > 0 && (tipo !== 'traspaso' || (para && para !== quien));
 
   return (
     <div className="panel p-4 space-y-3">
       <p className="t-eyebrow">{titulo}</p>
 
-      <Selector etiqueta={tipo === 'traspaso' ? 'Quién paga' : tipo === 'cargo' ? 'A quién le tocaba' : 'Quién puso el dinero'}
-        gente={gente} valor={quien} onCambiar={setQuien} />
-
+      <Selector etiqueta={etiqueta} gente={gente} valor={quien} onCambiar={setQuien} />
       {tipo === 'traspaso' && (
         <Selector etiqueta="A quién" gente={gente.filter(g => g.id !== quien)}
           valor={para} onCambiar={setPara} />
       )}
 
-      <div>
-        <p className="t-eyebrow mb-1">Cuánto</p>
-        <input type="number" inputMode="decimal" min="0" step="1" value={monto}
-          onChange={e => setMonto(e.target.value)} placeholder="0"
-          className="t-num w-full bg-night/60 border border-glass/50 rounded-lg px-3 py-2" />
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <p className="t-eyebrow mb-1">Cuánto</p>
+          <input type="number" inputMode="decimal" min="0" value={monto}
+            onChange={e => setMonto(e.target.value)} placeholder="0"
+            className="t-num w-full bg-night/60 border border-glass/50 rounded-lg px-3 py-2" />
+        </div>
+        <div>
+          <p className="t-eyebrow mb-1">Cuándo</p>
+          <input type="date" value={fecha} onChange={e => setFecha(e.target.value)}
+            className="t-num w-full bg-night/60 border border-glass/50 rounded-lg px-3 py-2" />
+        </div>
       </div>
-
-      <input value={nota} onChange={e => setNota(e.target.value)}
-        placeholder="Nota (opcional)"
-        className="w-full bg-night/60 border border-glass/50 rounded-lg px-3 py-2 text-sm" />
+      <p className="text-xs text-line/40">
+        La fecha importa: el dinero va tapando las noches de la más vieja a la más nueva.
+      </p>
 
       <div className="flex gap-2">
         <button className="btn btn-ghost flex-1 text-sm" onClick={onCerrar}>Cancelar</button>
         <button className="btn btn-flood flex-1 text-sm" disabled={!valido}
           onClick={() => onGuardar({ tipo, quien, para: tipo === 'traspaso' ? para : null,
-            monto: Number(monto), nota: nota.trim() || null })}>
+            monto: Number(monto), fecha: aFecha(fecha),
+            semana: tipo === 'cargo' ? fecha : null })}>
           Guardar
         </button>
       </div>
@@ -188,6 +167,38 @@ function Selector({ etiqueta, gente, valor, onCambiar }) {
   );
 }
 
+function Reparto({ mov, n }) {
+  const [abierto, setAbierto] = useState(false);
+  const { cargos } = repartir(mov);
+  if (!cargos.length) return null;
+
+  return (
+    <div className="panel p-4">
+      <button className="flex w-full items-center justify-between" onClick={() => setAbierto(!abierto)}>
+        <span className="t-eyebrow">Qué billete pagó qué noche</span>
+        <span className="t-num text-xs text-line/40">{abierto ? '−' : '+'}</span>
+      </button>
+      {abierto && (
+        <ul className="mt-3 space-y-2">
+          {cargos.map((c, i) => (
+            <li key={i} className="py-2 border-t border-glass/25">
+              <p className="text-sm">
+                {c.semana || 'noche'} · le tocaba a <b>{n(c.quien)}</b>
+              </p>
+              <p className="t-num text-xs text-line/45 mt-0.5">
+                {c.cubiertoPor.length
+                  ? c.cubiertoPor.map(p => `${dinero(p.monto)} de ${n(p.quien)}`).join('  +  ')
+                  : 'sin pagar'}
+                {c.restante > 0.005 && `  ·  faltan ${dinero(c.restante)}`}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function Ajustes({ costo, onCambiar }) {
   const [abierto, setAbierto] = useState(false);
   const [v, setV] = useState(String(costo));
@@ -201,51 +212,45 @@ function Ajustes({ costo, onCambiar }) {
         <div className="flex gap-2 mt-3">
           <input type="number" inputMode="decimal" value={v} onChange={e => setV(e.target.value)}
             className="t-num flex-1 bg-night/60 border border-glass/50 rounded-lg px-3 py-2" />
-          <button className="btn btn-flood text-sm" onClick={() => { onCambiar(Number(v) || 0); setAbierto(false); }}>
-            Guardar
-          </button>
+          <button className="btn btn-flood text-sm"
+            onClick={() => { onCambiar(Number(v) || 0); setAbierto(false); }}>Guardar</button>
         </div>
       )}
     </div>
   );
 }
 
-function Movimientos({ mov, players, onBorrar }) {
+function Movimientos({ mov, n, onBorrar }) {
   const [todos, setTodos] = useState(false);
   if (!mov.length) return null;
-  const lista = todos ? mov : mov.slice(0, 8);
+  const lista = [...mov].sort((a, b) => (b.fecha || 0) - (a.fecha || 0));
+  const ver = todos ? lista : lista.slice(0, 6);
 
-  const texto = m => {
-    const n = id => players[id]?.name ?? id;
-    if (m.tipo === 'cargo') return `Noche a cuenta de ${n(m.quien)}`;
-    if (m.tipo === 'pago') return `${n(m.quien)} pagó la cancha`;
-    return `${n(m.quien)} le pagó a ${n(m.para)}`;
-  };
+  const texto = m => m.tipo === 'cargo' ? `Noche a cuenta de ${n(m.quien)}`
+    : m.tipo === 'pago' ? `${n(m.quien)} puso dinero`
+    : `${n(m.quien)} le devolvió a ${n(m.para)}`;
 
   return (
     <div className="panel p-4">
       <p className="t-eyebrow">Movimientos</p>
       <ul className="mt-2">
-        {lista.map(m => (
+        {ver.map(m => (
           <li key={m.id} className="flex items-center gap-2 py-2 border-t border-glass/25">
             <div className="flex-1 min-w-0">
               <p className="text-sm truncate">{texto(m)}</p>
-              <p className="t-num text-xs text-line/40">
-                {new Date(m.fecha).toLocaleDateString()}
-                {m.nota && ` · ${m.nota}`}
-              </p>
+              <p className="t-num text-xs text-line/40">{m.fecha ? deFecha(m.fecha) : ''}</p>
             </div>
             <span className={`t-num text-sm ${m.tipo === 'cargo' ? 'text-line/50' : 'text-flood'}`}>
               {m.tipo === 'cargo' ? '−' : '+'}{dinero(m.monto)}
             </span>
-            <button className="chip px-2 text-xs text-line/40" onClick={() => onBorrar(m.id)}
-              title="Borrar">×</button>
+            <button className="chip px-2 text-xs text-line/40"
+              onClick={() => onBorrar(m.id)} title="Borrar">×</button>
           </li>
         ))}
       </ul>
-      {mov.length > 8 && (
+      {lista.length > 6 && (
         <button className="btn btn-ghost w-full mt-3 text-xs py-2" onClick={() => setTodos(!todos)}>
-          {todos ? 'Ver menos' : `Ver los ${mov.length}`}
+          {todos ? 'Ver menos' : `Ver los ${lista.length}`}
         </button>
       )}
     </div>

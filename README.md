@@ -313,31 +313,37 @@ Antes de armar el cuadro puedes añadir invitados. No entran en la rotación de 
 
 ## Las cuentas
 
-La rotación dice *a quién le toca*. Las cuentas llevan *quién ha puesto dinero de
-verdad*, que casi nunca coincide: la gente paga en billetes que cubren varias
-noches, alguien paga por otro, y quedan saldos arrastrados.
+La rotación dice *a quién le toca*. Las cuentas siguen *el dinero de verdad*, que
+casi nunca coincide: la gente pone billetes que cubren varias noches, alguien
+paga por otro, y quedan deudas cruzadas.
 
-Todo se reduce a tres tipos de movimiento:
+**Cómo lo entiende la app.** Cada noche tiene un dueño —a quien le tocaba— y un
+precio. Cuando alguien pone un billete, ese dinero va tapando las noches
+pendientes de la más vieja a la más nueva, igual que pasa en la vida real. Si
+Matías pone $50 y con eso se cubren la noche de Santiago, la de Samuel y la mitad
+de la suya, entonces Santiago le debe $20 a Matías y Samuel le debe $20 a Matías.
+La deuda queda pegada a quien puso el dinero.
 
-| Movimiento | Cuándo se usa |
+Tres botones para registrar todo:
+
+| Botón | Cuándo |
 |---|---|
-| **Registrar una noche** | Se juega y la cancha cuesta X. Se anota a nombre de quien le tocaba. Se crea sola al fijar la noche |
-| **Pagó la cancha** | Alguien entregó dinero al club, sea cual sea el monto |
-| **Le pagó a alguien** | Alguien le devolvió dinero a otro directamente |
+| **Registrar noche** | Se jugó y la cancha costó X, a cuenta de quien le tocaba. Se crea sola al fijar la noche |
+| **Alguien puso dinero** | Alguien llevó un billete, del monto que sea |
+| **Alguien le devolvió a otro** | Devolución directa entre dos personas |
 
-Con eso la app calcula el **saldo** de cada uno: lo que ha puesto menos lo que le
-han cargado. Saldo positivo significa que puso de más y le deben; negativo, que
-debe.
+**La fecha importa.** El reparto va en orden cronológico, así que si metes
+movimientos antiguos, ponles su fecha real. Puedes meterlos en cualquier orden:
+la app los ordena sola.
 
-Arriba del todo sale **Para quedar en paz**: la lista más corta de transferencias
-que dejan a todos a cero. Cuando alguien pague, tocas el ✓ al lado y se anota sola.
+Arriba sale **quién le debe a quién**, con la noche que originó cada deuda. Cuando
+alguien pague, tocas el ✓ y se anota la devolución.
 
-**La suma de todos los saldos siempre tiene que dar cero.** Si no da, es que falta
-un movimiento o hay uno mal metido, y la app lo avisa en rojo. Es la red de
-seguridad: no puedes tener las cuentas descuadradas sin enterarte.
+En **Qué billete pagó qué noche** ves el desglose completo: cada noche con quién
+puso cuánto. Es la prueba de que las cuentas cuadran.
 
-En **Cuánto cuesta una noche** pones el precio de la cancha. Sirve para que el
-cargo se cree solo con el monto correcto.
+La app avisa si quedan noches sin pagar, y si el grupo tiene dinero a favor te
+dice cuántas noches más cubre.
 
 ## No hay avisos automáticos
 

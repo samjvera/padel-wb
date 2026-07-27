@@ -1,77 +1,117 @@
-// Cuenta corriente del grupo.
+// Cuenta corriente del grupo, siguiendo el dinero.
 //
-// Todo se reduce a tres tipos de movimiento:
+// La idea: cada noche tiene un dueño (a quien le tocaba) y un precio.
+// Cuando alguien pone un billete, ese dinero va tapando las noches
+// pendientes en orden, de la más vieja a la más nueva — que es justo
+// lo que pasa en la vida real.
 //
-//   cargo     — a alguien le tocaba pagar una noche y esa noche cuesta X.
-//   pago      — alguien le entregó dinero al club (o a quien cobra la cancha).
-//   traspaso  — alguien le devolvió dinero a otro directamente.
+// Si Matías pone 50 y con eso se cubren la noche de Santiago, la de
+// Samuel y la mitad de la suya, entonces Santiago le debe 20 a Matías
+// y Samuel le debe 20 a Matías. No hace falta calcular nada más:
+// la deuda queda pegada a quien puso el dinero.
 //
-// El saldo de cada uno es: lo que ha puesto  −  lo que le han cargado.
-//   saldo positivo → puso de más, le deben
-//   saldo negativo → debe
-//
-// La suma de todos los saldos siempre da cero. Si no da cero, hay un
-// movimiento mal metido, y la app lo avisa.
+// Los traspasos (devoluciones entre personas) van borrando esas deudas.
 
 export const TIPOS = {
   cargo: 'Noche de cancha',
-  pago: 'Pagó la cancha',
-  traspaso: 'Le pagó a alguien',
+  pago: 'Puso dinero',
+  traspaso: 'Le devolvió a alguien',
 };
 
+const orden = m => m.orden ?? m.fecha ?? 0;
+
+/**
+ * Reparte cada pago entre las noches pendientes, de la más vieja a la
+ * más nueva. Devuelve, para cada noche, quién puso el dinero.
+ */
+export function repartir(movimientos = []) {
+  const cargos = movimientos.filter(m => m.tipo === 'cargo')
+    .sort((a, b) => orden(a) - orden(b))
+    .map(c => ({ ...c, restante: Number(c.monto) || 0, cubiertoPor: [] }));
+
+  const pagos = movimientos.filter(m => m.tipo === 'pago')
+    .sort((a, b) => orden(a) - orden(b))
+    .map(p => ({ ...p, restante: Number(p.monto) || 0 }));
+
+  let i = 0;
+  for (const pago of pagos) {
+    while (pago.restante > 0.005 && i < cargos.length) {
+      const c = cargos[i];
+      if (c.restante <= 0.005) { i++; continue; }
+      const cuanto = Math.min(pago.restante, c.restante);
+      c.cubiertoPor.push({ quien: pago.quien, monto: cuanto });
+      c.restante -= cuanto;
+      pago.restante -= cuanto;
+      if (c.restante <= 0.005) i++;
+    }
+  }
+
+  const sobrante = pagos.reduce((a, p) => a + p.restante, 0);
+  const sinPagar = cargos.reduce((a, c) => a + c.restante, 0);
+  return { cargos, sobrante, sinPagar };
+}
+
+/**
+ * Quién le debe a quién, con el motivo.
+ * Deuda = a ti te tocaba una noche y la pagó otro.
+ */
+export function deudas(movimientos = []) {
+  const { cargos, sobrante, sinPagar } = repartir(movimientos);
+  const mapa = new Map();   // "deudor→acreedor" -> { monto, motivos[] }
+
+  const sumar = (de, a, monto, motivo) => {
+    if (de === a || monto <= 0.005) return;
+    const k = `${de}→${a}`;
+    const e = mapa.get(k) || { de, a, monto: 0, motivos: [] };
+    e.monto += monto;
+    if (motivo) e.motivos.push(motivo);
+    mapa.set(k, e);
+  };
+
+  for (const c of cargos) {
+    for (const parte of c.cubiertoPor) {
+      sumar(c.quien, parte.quien, parte.monto, c.semana || null);
+    }
+  }
+
+  // Las devoluciones borran deuda; si se devuelve de más, se invierte.
+  for (const t of movimientos.filter(m => m.tipo === 'traspaso')) {
+    const monto = Number(t.monto) || 0;
+    const k = `${t.quien}→${t.para}`;
+    const e = mapa.get(k);
+    if (e) {
+      e.monto -= monto;
+      if (e.monto <= 0.005) {
+        mapa.delete(k);
+        if (e.monto < -0.005) sumar(t.para, t.quien, -e.monto, 'devolvió de más');
+      }
+    } else {
+      sumar(t.para, t.quien, monto, 'devolvió de más');
+    }
+  }
+
+  return {
+    lista: [...mapa.values()].filter(d => d.monto > 0.005)
+      .sort((a, b) => b.monto - a.monto),
+    sobrante,
+    sinPagar,
+  };
+}
+
+/** Resumen por persona: cuánto le deben menos cuánto debe. */
 export function saldos(movimientos = [], jugadores = []) {
   const s = Object.fromEntries(jugadores.map(id => [id, 0]));
-  const suma = (id, n) => { if (id != null) s[id] = (s[id] ?? 0) + n; };
-
-  for (const m of movimientos) {
-    const monto = Number(m.monto) || 0;
-    if (m.tipo === 'cargo') suma(m.quien, -monto);
-    else if (m.tipo === 'pago') suma(m.quien, +monto);
-    else if (m.tipo === 'traspaso') { suma(m.quien, +monto); suma(m.para, -monto); }
+  for (const d of deudas(movimientos).lista) {
+    if (d.de in s) s[d.de] -= d.monto;
+    if (d.a in s) s[d.a] += d.monto;
   }
   return s;
 }
 
-/**
- * Menor número de transferencias que dejan todos los saldos a cero.
- * Empareja al que más debe con al que más le deben, repetidamente.
- */
-export function liquidar(saldosMap, centavos = 0.01) {
-  const deben = [], lesDeben = [];
-  for (const [id, v] of Object.entries(saldosMap)) {
-    if (v < -centavos) deben.push({ id, monto: -v });
-    else if (v > centavos) lesDeben.push({ id, monto: v });
-  }
-  deben.sort((a, b) => b.monto - a.monto);
-  lesDeben.sort((a, b) => b.monto - a.monto);
-
-  const pagos = [];
-  let i = 0, j = 0;
-  while (i < deben.length && j < lesDeben.length) {
-    const cuanto = Math.min(deben[i].monto, lesDeben[j].monto);
-    pagos.push({ de: deben[i].id, a: lesDeben[j].id, monto: Math.round(cuanto * 100) / 100 });
-    deben[i].monto -= cuanto;
-    lesDeben[j].monto -= cuanto;
-    if (deben[i].monto <= centavos) i++;
-    if (lesDeben[j].monto <= centavos) j++;
-  }
-  return pagos;
-}
-
-/** Comprobación de integridad: los saldos tienen que sumar cero. */
-export function cuadra(saldosMap) {
-  const total = Object.values(saldosMap).reduce((a, b) => a + b, 0);
-  return Math.abs(total) < 0.01;
-}
-
-/** Cuántas noches lleva pagadas por adelantado el conjunto del grupo. */
+/** Noches que el grupo lleva pagadas por adelantado. */
 export function nochesCubiertas(movimientos = [], costoNoche = 0) {
   if (!costoNoche) return 0;
-  const puesto = movimientos.filter(m => m.tipo === 'pago')
-    .reduce((a, m) => a + (Number(m.monto) || 0), 0);
-  const gastado = movimientos.filter(m => m.tipo === 'cargo')
-    .reduce((a, m) => a + (Number(m.monto) || 0), 0);
-  return (puesto - gastado) / costoNoche;
+  return deudas(movimientos).sobrante / costoNoche;
 }
 
 export const nuevoId = () => `m${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
