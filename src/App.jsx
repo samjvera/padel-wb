@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Availability from './components/Availability';
 import MatchDay from './components/MatchDay';
 import Payments from './components/Payments';
+import Cuentas from './components/Cuentas';
 import Setup from './components/Setup';
 import { configurado } from './config';
 import { weekId, whoIsIn, proximoReinicio } from './lib/week';
@@ -9,7 +10,9 @@ import { elegirPagador } from './lib/payments';
 import {
   watchPlayers, watchWeek, watchSession, watchPayments,
   fijarDia, reabrirSemana, ensureWeek, leerYo, guardarYo, olvidarYo, unirse,
+  watchLedger, guardarLedger,
 } from './lib/firebase';
+import { nuevoId } from './lib/ledger';
 
 export default function App() {
   const [wid, setWid] = useState(() => weekId());
@@ -18,6 +21,7 @@ export default function App() {
   const [week, setWeek] = useState({ availability: {}, status: 'abierta' });
   const [session, setSession] = useState(null);
   const [pagos, setPagos] = useState({ paidCount: {}, history: [] });
+  const [ledger, setLedger] = useState({ costoNoche: 20, movimientos: [] });
   const [tab, setTab] = useState('semana');
   const [cargado, setCargado] = useState(false);
   const [denegado, setDenegado] = useState(false);
@@ -36,7 +40,8 @@ export default function App() {
         p => { setPlayers(p); setCargado(true); setDenegado(false); },
         () => setDenegado(true),   // reglas de Firestore mal publicadas
       ),
-      watchWeek(wid, setWeek), watchSession(wid, setSession), watchPayments(setPagos),
+      watchWeek(wid, setWeek), watchSession(wid, setSession),
+      watchPayments(setPagos), watchLedger(setLedger),
     ];
     return () => u.forEach(f => f());
   }, [wid]);
@@ -73,7 +78,13 @@ export default function App() {
           ? <MatchDay wid={wid} week={week} session={session} players={players} />
           : <Vacio titulo="Todavía no hay noche fijada"
               texto="Cuando se fije el día aquí aparece el americano completo." />)}
-        {tab === 'pagos' && <Payments wid={wid} week={week} players={players} pagos={pagos} />}
+        {tab === 'pagos' && (
+          <>
+            <Cuentas ledger={ledger} players={players} pagos={pagos} />
+            <div className="court-rule my-6" />
+            <Payments wid={wid} week={week} players={players} pagos={pagos} />
+          </>
+        )}
       </main>
 
       <Nav tab={tab} setTab={setTab} />
@@ -105,7 +116,7 @@ function Header({ wid, me, fijada, onCambiar }) {
 }
 
 function Nav({ tab, setTab }) {
-  const tabs = [['semana', 'Semana'], ['partido', 'Partido'], ['pagos', 'Pagos']];
+  const tabs = [['semana', 'Semana'], ['partido', 'Partido'], ['pagos', 'Cuentas']];
   return (
     <nav className="fixed bottom-0 inset-x-0 pb-[env(safe-area-inset-bottom)]
       bg-night/92 backdrop-blur border-t border-glass/35">

@@ -117,6 +117,16 @@ export const guardarResultado = (wid, index, marcador) =>
 
 export const borrarSesion = wid => setDoc(doc(db, 'sessions', wid), { rounds: [], results: {} });
 
+/* ---------- cuentas ---------- */
+
+export function watchLedger(cb) {
+  return onSnapshot(doc(db, 'meta', 'ledger'), d =>
+    cb(d.exists() ? d.data() : { costoNoche: 20, movimientos: [] }));
+}
+
+export const guardarLedger = datos =>
+  setDoc(doc(db, 'meta', 'ledger'), datos, { merge: true });
+
 /* ---------- pagos ---------- */
 
 export function watchPayments(cb) {

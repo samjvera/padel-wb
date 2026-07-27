@@ -13,9 +13,18 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
-      # El nombre del repositorio se detecta solo: no hay nada que configurar
-      # aunque le pongas otro nombre o lo renombres después.
-      - run: VITE_BASE="/${GITHUB_REPOSITORY#*/}/" npm run build
+      # Detecta solo dónde va a vivir la app:
+      #  - con dominio propio (archivo public/CNAME) → raíz del dominio
+      #  - sin dominio propio → subcarpeta con el nombre del repositorio
+      - name: Construir
+        run: |
+          if [ -f public/CNAME ]; then
+            echo "Dominio propio detectado: $(cat public/CNAME)"
+            VITE_BASE="/" npm run build
+          else
+            echo "Sin dominio propio, usando /${GITHUB_REPOSITORY#*/}/"
+            VITE_BASE="/${GITHUB_REPOSITORY#*/}/" npm run build
+          fi
       - uses: actions/upload-pages-artifact@v3
         with: { path: dist }
   deploy:

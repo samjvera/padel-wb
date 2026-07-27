@@ -11,8 +11,8 @@ export default function Payments({ wid, week, players, pagos }) {
   return (
     <section className="space-y-5">
       <header>
-        <p className="t-eyebrow">Cancha</p>
-        <h2 className="t-display text-3xl mt-1">Quién paga</h2>
+        <p className="t-eyebrow">Rotación</p>
+        <h2 className="t-display text-2xl mt-1">A quién le toca</h2>
       </header>
 
       {week.status === 'fijada' ? (

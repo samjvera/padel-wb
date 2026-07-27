@@ -309,8 +309,35 @@ el del otro se calcula solo. La tabla se ordena en vivo.
 
 Antes de armar el cuadro puedes añadir invitados. No entran en la rotación de pago.
 
-**Pestaña Pagos.** A quién le toca esta semana y la cola completa. Cuando pague,
-tocan **Marcar como pagado**.
+**Pestaña Cuentas.** Lleva la cuenta corriente del grupo. Ver abajo.
+
+## Las cuentas
+
+La rotación dice *a quién le toca*. Las cuentas llevan *quién ha puesto dinero de
+verdad*, que casi nunca coincide: la gente paga en billetes que cubren varias
+noches, alguien paga por otro, y quedan saldos arrastrados.
+
+Todo se reduce a tres tipos de movimiento:
+
+| Movimiento | Cuándo se usa |
+|---|---|
+| **Registrar una noche** | Se juega y la cancha cuesta X. Se anota a nombre de quien le tocaba. Se crea sola al fijar la noche |
+| **Pagó la cancha** | Alguien entregó dinero al club, sea cual sea el monto |
+| **Le pagó a alguien** | Alguien le devolvió dinero a otro directamente |
+
+Con eso la app calcula el **saldo** de cada uno: lo que ha puesto menos lo que le
+han cargado. Saldo positivo significa que puso de más y le deben; negativo, que
+debe.
+
+Arriba del todo sale **Para quedar en paz**: la lista más corta de transferencias
+que dejan a todos a cero. Cuando alguien pague, tocas el ✓ al lado y se anota sola.
+
+**La suma de todos los saldos siempre tiene que dar cero.** Si no da, es que falta
+un movimiento o hay uno mal metido, y la app lo avisa en rojo. Es la red de
+seguridad: no puedes tener las cuentas descuadradas sin enterarte.
+
+En **Cuánto cuesta una noche** pones el precio de la cancha. Sirve para que el
+cargo se cree solo con el monto correcto.
 
 ## No hay avisos automáticos
 
@@ -373,6 +400,54 @@ nuevo. Los encuentras en Firebase → **Descripción general del proyecto** →
 
 Mantén las comillas y las comas; solo cambia lo de dentro. Luego **Commit** y
 **Push**.
+
+## Ponerle una dirección más corta
+
+La app ya funciona en `https://TU_USUARIO.github.io/NOMBRE_DEL_REPO/`, que es
+gratis para siempre. Si quieres algo más corto, hay dos caminos.
+
+### Gratis: alojarla en Cloudflare Pages
+
+Te da una dirección tipo `padelwb.pages.dev`, con el nombre que tú elijas.
+
+1. Crea una cuenta en [dash.cloudflare.com](https://dash.cloudflare.com) (gratis,
+   no pide tarjeta).
+2. **Compute (Workers y Pages)** → **Create** → pestaña **Pages** → **Connect to Git**.
+3. Autoriza GitHub y elige tu repositorio.
+4. En la configuración de compilación pon:
+   - *Framework preset:* **Vite**
+   - *Build command:* `npm run build`
+   - *Build output directory:* `dist`
+5. **Save and Deploy**.
+
+Cada vez que hagas *Push*, Cloudflare republica sola. Puedes dejar también la de
+GitHub Pages funcionando: las dos apuntan a la misma base de datos y muestran lo
+mismo.
+
+> La app detecta sola dónde vive, así que no hay que cambiar nada en el código.
+
+### De pago: un dominio de verdad
+
+Un dominio propio como `padelwb.com` cuesta unos 10–12 dólares al año. **No hay
+forma gratis de tener uno**: lo que se anuncia como "dominio gratis" siempre es
+un subdominio de otro (`.pages.dev`, `.is-a.dev`, `.eu.org`).
+
+Lo que sí es gratis es el alojamiento. Si compras un dominio en cualquier
+registrador (Namecheap, Porkbun, Cloudflare), conectarlo no cuesta nada:
+
+1. Crea una carpeta llamada `public` dentro del repositorio.
+2. Dentro, un archivo llamado `CNAME` (sin extensión) que contenga solo tu
+   dominio, por ejemplo `padelwb.com`.
+3. En GitHub: **Settings** → **Pages** → **Custom domain** → escribe el dominio.
+4. En tu registrador, apunta el dominio a GitHub siguiendo las instrucciones que
+   GitHub te muestre en esa misma pantalla.
+5. *Commit* y *Push*.
+
+La app se da cuenta sola de que ahora vive en la raíz del dominio y se construye
+en consecuencia. No hay que tocar nada más.
+
+> Los antiguos dominios gratuitos `.tk`, `.ml` y `.ga` de Freenom ya no existen:
+> el servicio dejó de darlos. Si encuentras guías que los mencionan, están viejas.
 
 ## Cambiar personas
 
