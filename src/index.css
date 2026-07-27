@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --night: #04222E;
+  --court: #0E5064;
+  --court2: #12657F;
+  --glass: #2E7C93;
+  --line: #EAF4F2;
+  --flood: #FFB74A;
+}
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--line);
+    font-family: Inter, system-ui, sans-serif;
+    /* halo de reflector: la luz cae desde arriba sobre la cancha */
+    background-image:
+      radial-gradient(120% 60% at 50% -8%, rgba(255,183,74,.16) 0%, rgba(255,183,74,0) 62%),
+      radial-gradient(90% 50% at 50% 110%, rgba(46,124,147,.22) 0%, rgba(46,124,147,0) 70%);
+    background-attachment: fixed;
+    min-height: 100dvh;
+  }
+  :focus-visible {
+    outline: 2px solid var(--flood);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  /* Display: Archivo muy ancha y apretada — energía de marcador de club */
+  .t-display {
+    font-family: Archivo, system-ui, sans-serif;
+    font-variation-settings: 'wdth' 118, 'wght' 800;
+    letter-spacing: -.035em;
+    text-transform: uppercase;
+    line-height: .92;
+  }
+  .t-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .6875rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: rgba(234,244,242,.5);
+  }
+  .t-num { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  /* Divisor = línea de cancha: sólida con corte central, como la línea de saque */
+  .court-rule {
+    height: 1px;
+    background: linear-gradient(to right,
+      rgba(234,244,242,.22) 0 46%, transparent 46% 54%, rgba(234,244,242,.22) 54% 100%);
+  }
+
+  .panel {
+    background: rgba(14,80,100,.42);
+    border: 1px solid rgba(46,124,147,.45);
+    border-radius: 14px;
+    backdrop-filter: blur(6px);
+  }
+
+  .chip {
+    border: 1px solid rgba(46,124,147,.6);
+    border-radius: 999px;
+    padding: .25rem .625rem;
+    font-size: .75rem;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .btn {
+    font-family: Archivo, system-ui, sans-serif;
+    font-variation-settings: 'wdth' 112, 'wght' 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    border-radius: 10px;
+    padding: .75rem 1.1rem;
+    transition: transform .12s ease, background .18s ease, opacity .18s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-flood { background: var(--flood); color: #08303F; }
+  .btn-flood:hover { background: #FFC468; }
+  .btn-ghost { border: 1px solid rgba(46,124,147,.65); color: var(--line); }
+  .btn-ghost:hover { background: rgba(46,124,147,.2); }
+  .btn:disabled { opacity: .38; pointer-events: none; }
+
+  /* Celda de disponibilidad */
+  .cell {
+    border: 1px solid rgba(46,124,147,.4);
+    border-radius: 8px;
+    min-height: 46px;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .cell[data-on='true'] {
+    background: rgba(255,183,74,.9);
+    border-color: var(--flood);
+    color: #08303F;
+  }
+  .cell[data-best='true'] { border-color: rgba(255,183,74,.75); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

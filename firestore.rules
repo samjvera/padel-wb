@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Antes de la configuración inicial no existe meta/setup, así que
+    // cualquier persona con sesión de Google puede crear el grupo.
+    // En cuanto se crea, esta puerta se cierra para siempre.
+    function sinConfigurar() {
+      return request.auth != null
+        && !exists(/databases/$(database)/documents/meta/setup);
+    }
+
+    // Después, solo entran los correos que estén en la lista.
+    function esDelGrupo() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/allowlist/$(request.auth.token.email));
+    }
+
+    function permitido() { return esDelGrupo() || sinConfigurar(); }
+
+    match /allowlist/{email} {
+      allow read: if request.auth != null;
+      allow write: if sinConfigurar();
+    }
+
+    match /players/{id} {
+      allow read: if permitido();
+      // Ya configurado, solo se pueden crear o editar invitados.
+      allow create: if sinConfigurar()
+        || (esDelGrupo() && request.resource.data.isGuest == true);
+      allow update: if sinConfigurar()
+        || (esDelGrupo() && resource.data.isGuest == true);
+      allow delete: if false;
+    }
+
+    match /weeks/{wid}    { allow read, write: if esDelGrupo(); }
+    match /sessions/{wid} { allow read, write: if esDelGrupo(); }
+
+    match /meta/{doc} {
+      allow read: if permitido();
+      allow write: if permitido();
+    }
+  }
+}
