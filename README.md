@@ -313,37 +313,27 @@ Antes de armar el cuadro puedes añadir invitados. No entran en la rotación de 
 
 ## Las cuentas
 
-La rotación dice *a quién le toca*. Las cuentas siguen *el dinero de verdad*, que
-casi nunca coincide: la gente pone billetes que cubren varias noches, alguien
-paga por otro, y quedan deudas cruzadas.
+La pantalla muestra una sola cosa: **quién le debe a quién**. Y hay un solo botón:
+**Alguien llevó dinero**.
 
-**Cómo lo entiende la app.** Cada noche tiene un dueño —a quien le tocaba— y un
-precio. Cuando alguien pone un billete, ese dinero va tapando las noches
-pendientes de la más vieja a la más nueva, igual que pasa en la vida real. Si
-Matías pone $50 y con eso se cubren la noche de Santiago, la de Samuel y la mitad
-de la suya, entonces Santiago le debe $20 a Matías y Samuel le debe $20 a Matías.
-La deuda queda pegada a quien puso el dinero.
+Eso es todo lo que se usa cada semana. Cuatro toques: el botón, el nombre, el
+monto, guardar. No hay que elegir tipo de movimiento, ni destinatario, ni fecha.
 
-Tres botones para registrar todo:
+**Cómo lo deduce.** Cada noche que se juega queda anotada a nombre de quien le
+tocaba pagar —se crea sola al fijar el día—. Cuando alguien lleva un billete, ese
+dinero va tapando las noches pendientes de la más vieja a la más nueva, igual que
+en la vida real. Si Matías lleva $50 y con eso se cubren la noche de Santiago, la
+de Samuel y la mitad de la suya, la app concluye que Santiago le debe $20 a Matías
+y Samuel otros $20.
 
-| Botón | Cuándo |
-|---|---|
-| **Registrar noche** | Se jugó y la cancha costó X, a cuenta de quien le tocaba. Se crea sola al fijar la noche |
-| **Alguien puso dinero** | Alguien llevó un billete, del monto que sea |
-| **Alguien le devolvió a otro** | Devolución directa entre dos personas |
+Cuando alguien salda su deuda, tocas **ya pagó** al lado y desaparece.
 
-**La fecha importa.** El reparto va en orden cronológico, así que si metes
-movimientos antiguos, ponles su fecha real. Puedes meterlos en cualquier orden:
-la app los ordena sola.
+Debajo, **+ detalles y correcciones** despliega lo que casi nunca hace falta:
+cambiar el precio de la noche, añadir noches viejas a mano, ver qué billete pagó
+qué noche, y borrar movimientos mal metidos.
 
-Arriba sale **quién le debe a quién**, con la noche que originó cada deuda. Cuando
-alguien pague, tocas el ✓ y se anota la devolución.
-
-En **Qué billete pagó qué noche** ves el desglose completo: cada noche con quién
-puso cuánto. Es la prueba de que las cuentas cuadran.
-
-La app avisa si quedan noches sin pagar, y si el grupo tiene dinero a favor te
-dice cuántas noches más cubre.
+La app avisa si faltan noches por pagar, y si hay dinero adelantado te dice
+cuántas noches cubre.
 
 ## No hay avisos automáticos
 
