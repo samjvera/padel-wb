@@ -2,105 +2,154 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hoja de resultados de club: cartulina, tinta y un tampón.
+   Sin degradados, sin cristal, sin sombras. Lo que hay es papel. */
+
 :root {
-  --night: #04222E;
-  --court: #0E5064;
-  --court2: #12657F;
-  --glass: #2E7C93;
-  --line: #EAF4F2;
-  --flood: #FFB74A;
+  --paper: #F2F1ED;
+  --card:  #FBFAF7;
+  --ink:   #171A1E;
+  --ink2:  #5A6068;
+  --rule:  #C7C4BB;
+  --stamp: #B33A2B;
 }
 
 @layer base {
   html { -webkit-tap-highlight-color: transparent; }
   body {
     margin: 0;
-    background: var(--night);
-    color: var(--line);
-    font-family: Inter, system-ui, sans-serif;
-    /* halo de reflector: la luz cae desde arriba sobre la cancha */
-    background-image:
-      radial-gradient(120% 60% at 50% -8%, rgba(255,183,74,.16) 0%, rgba(255,183,74,0) 62%),
-      radial-gradient(90% 50% at 50% 110%, rgba(46,124,147,.22) 0%, rgba(46,124,147,0) 70%);
-    background-attachment: fixed;
     min-height: 100dvh;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.45;
   }
-  :focus-visible {
-    outline: 2px solid var(--flood);
-    outline-offset: 2px;
-    border-radius: 2px;
-  }
+  :focus-visible { outline: 2px solid var(--stamp); outline-offset: 2px; }
+  table { font-variant-numeric: tabular-nums; }
 }
 
 @layer components {
-  /* Display: Archivo muy ancha y apretada — energía de marcador de club */
+  /* Condensada y en caja alta, como la rotulación de un cuadro de torneo */
   .t-display {
     font-family: Archivo, system-ui, sans-serif;
-    font-variation-settings: 'wdth' 118, 'wght' 800;
-    letter-spacing: -.035em;
+    font-variation-settings: 'wdth' 79, 'wght' 800;
     text-transform: uppercase;
-    line-height: .92;
+    letter-spacing: 0.005em;
+    line-height: 0.95;
   }
-  .t-eyebrow {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: .6875rem;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: rgba(234,244,242,.5);
-  }
-  .t-num { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
 
-  /* Divisor = línea de cancha: sólida con corte central, como la línea de saque */
-  .court-rule {
+  /* Los rótulos NO son monoespaciados: eso era el tic delator.
+     Van en la misma sans, apretados, con un filete al lado. */
+  .t-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink2);
+  }
+  /* Rótulo de sección con filete que ocupa el resto del ancho */
+  .t-section {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink2);
+  }
+  .t-section::after {
+    content: '';
+    flex: 1;
     height: 1px;
-    background: linear-gradient(to right,
-      rgba(234,244,242,.22) 0 46%, transparent 46% 54%, rgba(234,244,242,.22) 54% 100%);
+    background: var(--rule);
+  }
+
+  /* El monoespaciado se reserva para cifras. Ahí sí aporta. */
+  .t-num {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Filete doble, como el que cierra una sección en un impreso */
+  .court-rule {
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    height: 3px;
   }
 
   .panel {
-    background: rgba(14,80,100,.42);
-    border: 1px solid rgba(46,124,147,.45);
-    border-radius: 14px;
-    backdrop-filter: blur(6px);
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
   }
 
   .chip {
-    border: 1px solid rgba(46,124,147,.6);
-    border-radius: 999px;
-    padding: .25rem .625rem;
-    font-size: .75rem;
-    font-family: 'IBM Plex Mono', monospace;
+    border: 1px solid var(--rule);
+    background: var(--card);
+    border-radius: 2px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
   }
 
   .btn {
     font-family: Archivo, system-ui, sans-serif;
-    font-variation-settings: 'wdth' 112, 'wght' 700;
+    font-variation-settings: 'wdth' 85, 'wght' 700;
     text-transform: uppercase;
-    letter-spacing: .04em;
-    border-radius: 10px;
-    padding: .75rem 1.1rem;
-    transition: transform .12s ease, background .18s ease, opacity .18s ease;
+    letter-spacing: 0.05em;
+    border-radius: 2px;
+    padding: 0.7rem 1.1rem;
+    transition: background 0.12s linear, color 0.12s linear;
   }
-  .btn:active { transform: translateY(1px); }
-  .btn-flood { background: var(--flood); color: #08303F; }
-  .btn-flood:hover { background: #FFC468; }
-  .btn-ghost { border: 1px solid rgba(46,124,147,.65); color: var(--line); }
-  .btn-ghost:hover { background: rgba(46,124,147,.2); }
-  .btn:disabled { opacity: .38; pointer-events: none; }
+  .btn-stamp {
+    background: var(--stamp);
+    color: var(--card);
+    border: 1px solid var(--stamp);
+  }
+  .btn-stamp:hover { background: #9C3125; }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+  }
+  .btn-ghost:hover { background: rgba(23, 26, 30, 0.06); }
+  .btn:disabled { opacity: 0.35; pointer-events: none; }
 
-  /* Celda de disponibilidad */
+  /* Casillas de disponibilidad: cuadrícula de impreso */
   .cell {
-    border: 1px solid rgba(46,124,147,.4);
-    border-radius: 8px;
-    min-height: 46px;
-    transition: background .15s ease, border-color .15s ease;
+    border: 1px solid var(--rule);
+    background: var(--card);
+    border-radius: 1px;
+    min-height: 44px;
+    transition: background 0.1s linear;
   }
   .cell[data-on='true'] {
-    background: rgba(255,183,74,.9);
-    border-color: var(--flood);
-    color: #08303F;
+    background: var(--stamp);
+    border-color: var(--stamp);
+    color: var(--card);
   }
-  .cell[data-best='true'] { border-color: rgba(255,183,74,.75); }
+  .cell[data-best='true'] { border-color: var(--ink); }
+
+  /* Filas alternas, como un cuadro de puntuación */
+  .rayado > *:nth-child(odd) { background: rgba(23, 26, 30, 0.028); }
+
+  /* El sello. Un solo gesto, y por eso funciona. */
+  .sello {
+    display: inline-block;
+    border: 2px solid var(--stamp);
+    color: var(--stamp);
+    border-radius: 2px;
+    padding: 0.1rem 0.45rem;
+    font-family: Archivo, system-ui, sans-serif;
+    font-variation-settings: 'wdth' 85, 'wght' 800;
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transform: rotate(-4deg);
+    opacity: 0.9;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

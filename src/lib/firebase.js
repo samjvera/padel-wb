@@ -10,6 +10,21 @@ const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
 
+/* ---------- avisos de fallo ----------
+   Firestore rechaza escrituras en silencio si las reglas no las permiten.
+   Esto hace que cualquier fallo llegue a la pantalla en vez de perderse. */
+
+let avisar = null;
+export const alFallar = cb => { avisar = cb; };
+
+const vigilar = promesa => promesa.catch(e => {
+  console.error('[Cancha] no se pudo guardar:', e);
+  avisar?.(e?.code === 'permission-denied'
+    ? 'No se pudo guardar: las reglas de Firestore lo están bloqueando. Vuelve a publicarlas (Paso 3 del README).'
+    : `No se pudo guardar: ${e?.message || 'error desconocido'}`);
+  throw e;
+});
+
 /* ---------- jugadores ---------- */
 
 /* ---------- quién soy (guardado en este navegador) ---------- */
@@ -69,7 +84,7 @@ export async function crearGrupo(jugadores, ordenPago) {
   }
   batch.set(doc(db, 'meta', 'payments'), { paidCount: {}, history: [], order: ordenPago });
   batch.set(doc(db, 'meta', 'setup'), { done: true, at: serverTimestamp() });
-  await batch.commit();
+  await vigilar(batch.commit());
 }
 
 /* ---------- semana ---------- */
@@ -91,13 +106,13 @@ export async function ensureWeek(wid) {
 export async function setAvailability(wid, playerId, cellId, value) {
   await ensureWeek(wid);
   const path = `availability.${playerId}.${cellId}`;
-  await updateDoc(doc(db, 'weeks', wid), { [path]: value ? true : deleteField() });
+  await vigilar(updateDoc(doc(db, 'weeks', wid), { [path]: value ? true : deleteField() }));
 }
 
 export async function fijarDia(wid, cid, confirmed, payerId) {
-  await updateDoc(doc(db, 'weeks', wid), {
+  await vigilar(updateDoc(doc(db, 'weeks', wid), {
     cellId: cid, confirmed, payerId, status: 'fijada', fijadaAt: serverTimestamp(),
-  });
+  }));
 }
 
 export const reabrirSemana = wid =>
@@ -105,17 +120,34 @@ export const reabrirSemana = wid =>
 
 /* ---------- partido ---------- */
 
+/** Todas las semanas, para saber qué día se jugó cada partida. */
+export function watchWeeks(cb) {
+  return onSnapshot(collection(db, 'weeks'), snap => {
+    const map = {};
+    snap.forEach(d => { map[d.id] = d.data(); });
+    cb(map);
+  }, () => cb({}));
+}
+
+/** Todas las partidas jugadas, para el historial. */
+export function watchSessions(cb) {
+  return onSnapshot(collection(db, 'sessions'), snap => {
+    const lista = [];
+    snap.forEach(d => lista.push({ id: d.id, ...d.data() }));
+    cb(lista.sort((a, b) => b.id.localeCompare(a.id)));
+  }, () => cb([]));
+}
+
 export function watchSession(wid, cb) {
   return onSnapshot(doc(db, 'sessions', wid), d => cb(d.exists() ? { id: d.id, ...d.data() } : null));
 }
 
 export const guardarSesion = (wid, data) =>
-  setDoc(doc(db, 'sessions', wid), { ...data, createdAt: serverTimestamp() });
+  vigilar(setDoc(doc(db, 'sessions', wid), { ...data, createdAt: serverTimestamp() }));
 
 export const guardarResultado = (wid, index, marcador) =>
-  updateDoc(doc(db, 'sessions', wid), { [`results.${index}`]: marcador });
+  vigilar(updateDoc(doc(db, 'sessions', wid), { [`results.${index}`]: marcador }));
 
-export const borrarSesion = wid => setDoc(doc(db, 'sessions', wid), { rounds: [], results: {} });
 
 /* ---------- cuentas ---------- */
 
@@ -125,7 +157,7 @@ export function watchLedger(cb) {
 }
 
 export const guardarLedger = datos =>
-  setDoc(doc(db, 'meta', 'ledger'), datos, { merge: true });
+  vigilar(setDoc(doc(db, 'meta', 'ledger'), datos, { merge: true }));
 
 /* ---------- pagos ---------- */
 

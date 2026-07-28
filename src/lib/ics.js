@@ -56,7 +56,7 @@ export function icsPartido({ fecha, slot, jugadores, pagador, url }) {
     `DTSTAMP:${fmtUTC(new Date())}`,
     `DTSTART:${fmtLocal(inicio)}`,
     `DTEND:${fmtLocal(fin)}`,
-    `SUMMARY:${esc('🎾 Pádel — americano')}`,
+    `SUMMARY:${esc('Pádel — americano')}`,
     `DESCRIPTION:${esc(desc)}`,
     'BEGIN:VALARM', 'TRIGGER:-PT3H', 'ACTION:DISPLAY',
     `DESCRIPTION:${esc('Pádel en 3 horas')}`, 'END:VALARM',

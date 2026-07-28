@@ -116,6 +116,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Esta app NO usa contraseñas ni cuentas: cualquiera con el enlace entra.
+    // Las reglas no controlan QUIÉN escribe, sino QUÉ se puede escribir, para
+    // que un robot que encuentre la dirección no pueda llenar la base de datos
+    // de basura ni borrar el grupo.
+
     function tamanoSano() {
       return request.resource.data.size() < 40;
     }
@@ -123,10 +128,11 @@ service cloud.firestore {
     match /players/{id} {
       allow read: if true;
       allow create, update: if tamanoSano();
-      allow delete: if false;
+      allow delete: if false;           // nadie puede borrar jugadores
     }
 
     match /weeks/{wid} {
+      // Solo semanas con formato 2026-W31: bloquea documentos inventados
       allow read: if true;
       allow write: if wid.matches('^[0-9]{4}-W[0-9]{2}$');
     }
@@ -138,9 +144,10 @@ service cloud.firestore {
 
     match /meta/{doc} {
       allow read: if true;
-      allow write: if doc in ['payments', 'setup'] && tamanoSano();
+      allow write: if doc in ['payments', 'setup', 'ledger'];
     }
 
+    // Cualquier otra ruta queda cerrada
     match /{document=**} {
       allow read, write: if false;
     }
@@ -311,6 +318,23 @@ Antes de armar el cuadro puedes añadir invitados. No entran en la rotación de 
 
 **Pestaña Cuentas.** Lleva la cuenta corriente del grupo. Ver abajo.
 
+## Qué se reinicia y qué no
+
+El reinicio de los lunes **no borra nada**. Simplemente empieza a escribir en una
+semana nueva; lo anterior queda intacto.
+
+| | Se reinicia el lunes | Dónde vive |
+|---|---|---|
+| Disponibilidad y día fijado | sí | uno por semana |
+| Cuadro del americano y marcadores | sí | uno por semana |
+| **Cuentas** | **no, nunca** | un solo registro permanente |
+| Rotación de pago | no | un solo registro |
+| La gente | no | uno por persona |
+
+Al final de la pestaña **Partido** está **Partidas anteriores**: cada una con el
+día real en que se jugó, la hora y su ganador. Tocas una y se despliega la tabla
+completa tal como quedó ese día.
+
 ## Las cuentas
 
 La pantalla tiene tres bloques, siempre a la vista:
@@ -369,6 +393,8 @@ acordarse el lunes de copiar el mensaje y pegarlo en el grupo.
 | Lo que ves | Qué pasa | Cómo se arregla |
 |---|---|---|
 | **Firestore está bloqueado** | Las reglas del Paso 3 no se publicaron | Firestore → Reglas → pega otra vez → Publicar |
+| Sale un aviso naranja de **No se pudo guardar** | Las reglas publicadas son de una versión vieja | Vuelve a pegar las del Paso 3 y publica |
+| Guardas algo y no aparece, sin ningún aviso | Tienes una versión vieja de la app | Copia el paquete nuevo y haz Commit + Push |
 | **Falta conectar Firebase** | `src/config.js` tiene `PEGA_AQUI` | Mira *Cambiar de proyecto de Firebase* abajo |
 | Página en blanco o error 404 | No terminó de publicarse, o la dirección está mal | Espera el ✓ verde en Actions. Revisa usuario, nombre del repositorio y la **barra final** |
 | **✗ roja** en Actions | Falta la carpeta `.github`, o copiaste la carpeta en vez de su contenido | Repite el Paso 5 con los ocultos visibles |

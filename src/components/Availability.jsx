@@ -14,9 +14,9 @@ export default function Availability({ wid, week, players, me, onFijar }) {
   return (
     <section className="space-y-5">
       <header>
-        <p className="t-eyebrow">Paso 1 — disponibilidad</p>
+        <p className="t-section">Paso 1 — disponibilidad</p>
         <h2 className="t-display text-3xl mt-1">¿Cuándo puedes?</h2>
-        <p className="text-sm text-line/55 mt-2">
+        <p className="text-sm text-ink/55 mt-2">
           Marca todos los horarios que te sirven. Mientras más marques, más fácil cuadrar.
         </p>
       </header>
@@ -37,7 +37,7 @@ export default function Availability({ wid, week, players, me, onFijar }) {
 
       <div className="panel p-4">
         <p className="t-eyebrow">Avisar al grupo</p>
-        <p className="text-sm text-line/55 mt-2 leading-relaxed">
+        <p className="text-sm text-ink/55 mt-2 leading-relaxed">
           La app no manda avisos. Copia el estado de la semana y pégalo donde ya
           hablan ustedes.
         </p>
@@ -54,7 +54,7 @@ export default function Availability({ wid, week, players, me, onFijar }) {
           <p className="t-display text-2xl mt-1.5">
             {best.dia.label} · {best.slot.short}
           </p>
-          <p className="t-num text-flood text-sm mt-1">
+          <p className="t-num text-stamp text-sm mt-1">
             {best.count} confirmado{best.count === 1 ? '' : 's'}
           </p>
           <div className="flex flex-wrap gap-1.5 mt-3">
@@ -62,17 +62,17 @@ export default function Availability({ wid, week, players, me, onFijar }) {
               <span key={pid} className="chip">{players[pid]?.name ?? pid}</span>
             ))}
           </div>
-          <button className="btn btn-flood w-full mt-4" onClick={() => onFijar(best)}>
+          <button className="btn btn-stamp w-full mt-4" onClick={() => onFijar(best)}>
             Fijar este día
           </button>
-          <p className="text-xs text-line/45 mt-2">
+          <p className="text-xs text-ink/45 mt-2">
             Al fijarlo se arma el americano y se asigna quién paga la cancha.
           </p>
         </div>
       ) : (
         <div className="panel p-5 text-center">
           <p className="t-display text-lg">Nadie ha marcado todavía</p>
-          <p className="text-sm text-line/55 mt-1.5">Sé el primero: toca una casilla arriba.</p>
+          <p className="text-sm text-ink/55 mt-1.5">Sé el primero: toca una casilla arriba.</p>
         </div>
       )}
     </section>
@@ -97,7 +97,7 @@ function Row({ slot, av, mine, best, players, toggle }) {
             aria-pressed={on}
             aria-label={`${d.label} ${slot.label}, ${n} disponibles`}
           >
-            <span className={`t-num text-sm font-semibold ${on ? '' : n ? 'text-flood' : 'text-line/30'}`}>
+            <span className={`t-num text-sm font-semibold ${on ? '' : n ? 'text-stamp' : 'text-ink/30'}`}>
               {n || '·'}
             </span>
           </button>

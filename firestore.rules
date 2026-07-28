@@ -30,7 +30,7 @@ service cloud.firestore {
 
     match /meta/{doc} {
       allow read: if true;
-      allow write: if doc in ['payments', 'setup'] && tamanoSano();
+      allow write: if doc in ['payments', 'setup', 'ledger'];
     }
 
     // Cualquier otra ruta queda cerrada

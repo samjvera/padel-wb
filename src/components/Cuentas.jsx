@@ -27,7 +27,7 @@ export default function Cuentas({ ledger, players, pagos }) {
   return (
     <section className="space-y-6">
       <header>
-        <p className="t-eyebrow">Cuentas</p>
+        <p className="t-section">Cuentas</p>
         <h2 className="t-display text-3xl mt-1">Quién le debe a quién</h2>
       </header>
 
@@ -38,22 +38,22 @@ export default function Cuentas({ ledger, players, pagos }) {
         ) : (
           <ul>
             {d.lista.map((x, i) => (
-              <li key={i} className="flex items-center gap-3 py-3 border-b border-glass/25 last:border-0">
+              <li key={i} className="flex items-center gap-3 py-3 border-b border-rule/25 last:border-0">
                 <div className="flex-1 min-w-0">
                   {x.cancha ? (
                     <>
                       <p className="text-sm"><b>{n(x.de)}</b>
-                        <span className="text-line/40"> → </span>
-                        <span className="text-flood">la cancha</span></p>
-                      <p className="t-eyebrow mt-0.5 text-flood/70">su partida sigue sin pagarse</p>
+                        <span className="text-ink/40"> → </span>
+                        <span className="text-stamp">la cancha</span></p>
+                      <p className="t-eyebrow mt-0.5 text-stamp/70">su partida sigue sin pagarse</p>
                     </>
                   ) : (
                     <p className="text-sm">
-                      <b>{n(x.de)}</b><span className="text-line/40"> → </span><b>{n(x.a)}</b>
+                      <b>{n(x.de)}</b><span className="text-ink/40"> → </span><b>{n(x.a)}</b>
                     </p>
                   )}
                 </div>
-                <span className="t-num text-flood font-semibold">{dinero(x.monto)}</span>
+                <span className="t-num text-stamp font-semibold">{dinero(x.monto)}</span>
                 <button className="chip px-3 py-1.5 whitespace-nowrap"
                   onClick={() => anadir(x.cancha
                     ? { tipo: 'pago', quien: x.de, monto: x.monto, fecha: Date.now() }
@@ -65,7 +65,7 @@ export default function Cuentas({ ledger, players, pagos }) {
           </ul>
         )}
         {d.sobrante > 0.005 && (
-          <p className="text-xs text-line/50 mt-3">
+          <p className="text-xs text-ink/50 mt-3">
             Hay {dinero(d.sobrante)} adelantados
             {costo > 0 && ` — cubren ${(d.sobrante / costo).toFixed(1)} partidas`}.
           </p>
@@ -76,29 +76,29 @@ export default function Cuentas({ ledger, players, pagos }) {
       <div>
         <div className="flex items-baseline justify-between mb-2">
           <p className="t-eyebrow">Partidas</p>
-          <span className="t-num text-xs text-line/35">{cargos.length}</span>
+          <span className="t-num text-xs text-ink/35">{cargos.length}</span>
         </div>
         <div className="panel p-4">
           {cargos.length === 0 ? (
-            <p className="text-sm text-line/50">
+            <p className="text-sm text-ink/50">
               Ninguna todavía. Se añaden solas al fijar el día en la pestaña Semana.
             </p>
           ) : (
             <ul>
               {cargos.map(c => (
-                <li key={c.id} className="flex items-start gap-3 py-2.5 border-b border-glass/25 last:border-0">
-                  <span className="t-num text-xs text-line/35 w-14 pt-0.5">
+                <li key={c.id} className="flex items-start gap-3 py-2.5 border-b border-rule/25 last:border-0">
+                  <span className="t-num text-xs text-ink/35 w-14 pt-0.5">
                     {c.fecha ? corta(c.fecha) : '—'}
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm">{n(c.quien)} · {dinero(c.monto)}</p>
-                    <p className="t-num text-xs text-line/40 truncate">
+                    <p className="t-num text-xs text-ink/40 truncate">
                       {c.restante > 0.005
                         ? `sin pagar${c.cubiertoPor.length ? ` · faltan ${dinero(c.restante)}` : ''}`
                         : `pagó ${c.cubiertoPor.map(p => n(p.quien)).join(' y ')}`}
                     </p>
                   </div>
-                  <button className="chip px-2 text-xs text-line/35"
+                  <button className="chip px-2 text-xs text-ink/35"
                     onClick={() => borrar(c.id)}>×</button>
                 </li>
               ))}
@@ -123,15 +123,15 @@ export default function Cuentas({ ledger, players, pagos }) {
         <p className="t-eyebrow mb-2">Dinero llevado</p>
         <div className="panel p-4">
           {pagosLista.length === 0 ? (
-            <p className="text-sm text-line/50">Nadie ha llevado dinero todavía.</p>
+            <p className="text-sm text-ink/50">Nadie ha llevado dinero todavía.</p>
           ) : (
             <ul>
               {pagosLista.map(m => (
-                <li key={m.id} className="flex items-center gap-3 py-2.5 border-b border-glass/25 last:border-0">
-                  <span className="t-num text-xs text-line/35 w-14">{corta(m.fecha)}</span>
+                <li key={m.id} className="flex items-center gap-3 py-2.5 border-b border-rule/25 last:border-0">
+                  <span className="t-num text-xs text-ink/35 w-14">{corta(m.fecha)}</span>
                   <p className="flex-1 text-sm">{n(m.quien)}</p>
-                  <span className="t-num text-sm text-flood">{dinero(m.monto)}</span>
-                  <button className="chip px-2 text-xs text-line/35"
+                  <span className="t-num text-sm text-stamp">{dinero(m.monto)}</span>
+                  <button className="chip px-2 text-xs text-ink/35"
                     onClick={() => borrar(m.id)}>×</button>
                 </li>
               ))}
@@ -143,14 +143,14 @@ export default function Cuentas({ ledger, players, pagos }) {
               onCerrar={() => setAbrir(null)}
               onGuardar={m => { anadir(m); setAbrir(null); }} />
           ) : (
-            <button className="btn btn-flood w-full mt-3" onClick={() => setAbrir('dinero')}>
+            <button className="btn btn-stamp w-full mt-3" onClick={() => setAbrir('dinero')}>
               Alguien llevó dinero
             </button>
           )}
         </div>
       </div>
 
-      <button className="w-full t-eyebrow text-line/35 py-2" onClick={() => setAjustes(!ajustes)}>
+      <button className="w-full t-eyebrow text-ink/35 py-2" onClick={() => setAjustes(!ajustes)}>
         {ajustes ? '− ajustes' : '+ ajustes'}
       </button>
       {ajustes && <Precio costo={costo} onGuardar={p => guardar(mov, p)} />}
@@ -165,7 +165,7 @@ function Gente({ players, valor, onCambiar }) {
     <div className="flex flex-wrap gap-1.5">
       {lista.map(g => (
         <button key={g.id} onClick={() => onCambiar(g.id)}
-          className={`chip py-2 ${valor === g.id ? 'bg-flood text-night border-flood' : ''}`}>
+          className={`chip py-2 ${valor === g.id ? 'bg-stamp text-paper border-stamp' : ''}`}>
           {g.name}
         </button>
       ))}
@@ -180,8 +180,8 @@ function LlevoDinero({ players, onCerrar, onGuardar }) {
   const [fecha, setFecha] = useState(hoy());
 
   return (
-    <div className="mt-4 pt-4 border-t border-glass/40 space-y-4">
-      <h3 className="t-display text-base text-flood">¿Quién llevó dinero?</h3>
+    <div className="mt-4 pt-4 border-t border-rule/40 space-y-4">
+      <h3 className="t-display text-base text-stamp">¿Quién llevó dinero?</h3>
       <Gente players={players} valor={quien} onCambiar={setQuien} />
 
       {quien && (
@@ -189,20 +189,20 @@ function LlevoDinero({ players, onCerrar, onGuardar }) {
           <div className="flex gap-2">
             {[20, 50, 100].map(v => (
               <button key={v} onClick={() => setMonto(v)}
-                className={`chip flex-1 py-2.5 t-num ${monto === v ? 'bg-flood text-night border-flood' : ''}`}>
+                className={`chip flex-1 py-2.5 t-num ${monto === v ? 'bg-stamp text-paper border-stamp' : ''}`}>
                 ${v}
               </button>
             ))}
             <input type="number" inputMode="decimal" min="0" placeholder="otro"
               value={[20, 50, 100].includes(monto) ? '' : (monto ?? '')}
               onChange={e => setMonto(Number(e.target.value) || null)}
-              className="t-num w-20 bg-night/60 border border-glass/50 rounded-full px-3 text-center text-sm" />
+              className="t-num w-20 bg-card border border-ink/25 rounded-sm px-3 text-center text-sm" />
           </div>
           {otra ? (
             <input type="date" value={fecha} onChange={e => setFecha(e.target.value)}
-              className="t-num w-full bg-night/60 border border-glass/50 rounded-lg px-3 py-2" />
+              className="t-num w-full bg-card border border-ink/25 rounded-sm px-3 py-2" />
           ) : (
-            <button className="t-eyebrow text-line/40" onClick={() => setOtra(true)}>
+            <button className="t-eyebrow text-ink/40" onClick={() => setOtra(true)}>
               hoy · cambiar fecha
             </button>
           )}
@@ -211,7 +211,7 @@ function LlevoDinero({ players, onCerrar, onGuardar }) {
 
       <div className="flex gap-2">
         <button className="btn btn-ghost flex-1 text-sm" onClick={onCerrar}>Cancelar</button>
-        <button className="btn btn-flood flex-1 text-sm" disabled={!quien || !monto}
+        <button className="btn btn-stamp flex-1 text-sm" disabled={!quien || !monto}
           onClick={() => onGuardar({ tipo: 'pago', quien, monto: Number(monto), fecha: aFecha(fecha) })}>
           Guardar
         </button>
@@ -227,27 +227,27 @@ function NuevaPartida({ players, pagos, costo, onCerrar, onGuardar }) {
   const [monto, setMonto] = useState(String(costo));
 
   return (
-    <div className="mt-4 pt-4 border-t border-glass/40 space-y-4">
-      <h3 className="t-display text-base text-flood">¿A quién le tocaba pagar?</h3>
+    <div className="mt-4 pt-4 border-t border-rule/40 space-y-4">
+      <h3 className="t-display text-base text-stamp">¿A quién le tocaba pagar?</h3>
       <Gente players={players} valor={quien} onCambiar={setQuien} />
 
       <div className="grid grid-cols-2 gap-2">
         <div>
           <p className="t-eyebrow mb-1">Cuándo</p>
           <input type="date" value={fecha} onChange={e => setFecha(e.target.value)}
-            className="t-num w-full bg-night/60 border border-glass/50 rounded-lg px-3 py-2" />
+            className="t-num w-full bg-card border border-ink/25 rounded-sm px-3 py-2" />
         </div>
         <div>
           <p className="t-eyebrow mb-1">Costó</p>
           <input type="number" inputMode="decimal" value={monto}
             onChange={e => setMonto(e.target.value)}
-            className="t-num w-full bg-night/60 border border-glass/50 rounded-lg px-3 py-2" />
+            className="t-num w-full bg-card border border-ink/25 rounded-sm px-3 py-2" />
         </div>
       </div>
 
       <div className="flex gap-2">
         <button className="btn btn-ghost flex-1 text-sm" onClick={onCerrar}>Cancelar</button>
-        <button className="btn btn-flood flex-1 text-sm" disabled={!quien || !(Number(monto) > 0)}
+        <button className="btn btn-stamp flex-1 text-sm" disabled={!quien || !(Number(monto) > 0)}
           onClick={() => onGuardar({ tipo: 'cargo', quien, monto: Number(monto),
             fecha: aFecha(fecha), semana: fecha })}>
           Añadir
@@ -264,7 +264,7 @@ function Precio({ costo, onGuardar }) {
       <p className="t-eyebrow">Precio de una partida</p>
       <div className="flex gap-2 mt-2">
         <input type="number" inputMode="decimal" value={v} onChange={e => setV(e.target.value)}
-          className="t-num flex-1 bg-night/60 border border-glass/50 rounded-lg px-3 py-2" />
+          className="t-num flex-1 bg-card border border-ink/25 rounded-sm px-3 py-2" />
         <button className="btn btn-ghost text-sm" onClick={() => onGuardar(Number(v) || 0)}>
           Guardar
         </button>

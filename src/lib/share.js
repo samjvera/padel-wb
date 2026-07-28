@@ -11,7 +11,7 @@ export function textoSemanaAbierta(week, players, url) {
     .filter(p => p.active && !p.isGuest && !marcaron.has(p.id))
     .map(p => p.name);
 
-  const lineas = ['🎾 Pádel — marquen sus horarios', ''];
+  const lineas = ['Pádel — marquen sus horarios', ''];
 
   if (ranked.length) {
     lineas.push('Va ganando:');
@@ -34,7 +34,7 @@ export function textoNocheFijada(week, players, url) {
   const pagador = players[week.payerId]?.name;
 
   return [
-    `🎾 Pádel — ${diaLabel} ${slotLabel}`,
+    `Pádel — ${diaLabel} ${slotLabel}`,
     '',
     `Juegan (${nombres.length}): ${nombres.join(', ')}`,
     pagador ? `Paga la cancha: ${pagador}` : 'Pago: nadie de la rotación juega, arréglenlo entre ustedes',
