@@ -161,6 +161,9 @@ export const guardarLedger = datos =>
 
 /* ---------- pagos ---------- */
 
+export const guardarOrden = order =>
+  vigilar(setDoc(doc(db, 'meta', 'payments'), { order }, { merge: true }));
+
 /** Solo guarda el orden de la cola. Los turnos se cuentan de las partidas. */
 export function watchPayments(cb) {
   return onSnapshot(doc(db, 'meta', 'payments'), d => cb(d.exists() ? d.data() : {}));

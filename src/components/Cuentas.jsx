@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { deudas, repartir, saldos, nuevoId } from '../lib/ledger';
-import { colaDePago, elegirPagador } from '../lib/payments';
-import { guardarLedger } from '../lib/firebase';
+import { colaDePago, elegirPagador, ORDEN_BASE } from '../lib/payments';
+import { guardarLedger, guardarOrden } from '../lib/firebase';
 
 const dinero = n => `$${Math.abs(n).toFixed(2).replace(/\.00$/, '')}`;
 const hoy = () => new Date().toISOString().slice(0, 10);
@@ -168,7 +168,12 @@ export default function Cuentas({ ledger, players, pagos, week }) {
       <button className="w-full t-eyebrow text-tx/35 py-2" onClick={() => setAjustes(!ajustes)}>
         {ajustes ? '− ajustes' : '+ ajustes'}
       </button>
-      {ajustes && <Precio costo={costo} onGuardar={p => guardar(mov, p)} />}
+      {ajustes && (
+        <>
+          <Precio costo={costo} onGuardar={p => guardar(mov, p)} />
+          <OrdenCola players={players} orden={pagos?.order} />
+        </>
+      )}
     </section>
   );
 }
@@ -332,6 +337,60 @@ function NuevaPartida({ players, pagos, mov, costo, onCerrar, onGuardar }) {
           onClick={() => onGuardar({ tipo: 'cargo', quien, monto: Number(monto),
             fecha: aFecha(fecha), semana: fecha })}>
           Añadir
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** El orden que decide los empates de turnos. Editable con flechas. */
+function OrdenCola({ players, orden }) {
+  const elegibles = Object.values(players)
+    .filter(p => p.gender === 'M' && !p.isGuest && p.active !== false)
+    .map(p => p.id);
+
+  // El orden guardado, más cualquiera que falte por el final
+  const base = (orden?.length ? orden : ORDEN_BASE).filter(id => elegibles.includes(id));
+  const inicial = [...base, ...elegibles.filter(id => !base.includes(id))];
+  const [lista, setLista] = useState(inicial);
+  const [guardado, setGuardado] = useState(false);
+
+  const mover = (i, d) => {
+    if (i + d < 0 || i + d >= lista.length) return;
+    const c = [...lista];
+    [c[i], c[i + d]] = [c[i + d], c[i]];
+    setLista(c);
+    setGuardado(false);
+  };
+
+  const cambiado = JSON.stringify(lista) !== JSON.stringify(inicial);
+
+  return (
+    <div className="panel overflow-hidden">
+      <div className="panel-cab">
+        <span className="t-eyebrow">Orden de la cola</span>
+        {guardado && <span className="badge badge-ac">guardado</span>}
+      </div>
+      <ul>
+        {lista.map((id, i) => (
+          <li key={id} className="fila">
+            <span className="t-num text-tiny text-t3 w-4">{i + 1}</span>
+            <span className="flex-1 text-base">{players[id]?.name ?? id}</span>
+            <button className="chip px-2.5 py-1" onClick={() => mover(i, -1)}
+              disabled={i === 0} aria-label="Subir">↑</button>
+            <button className="chip px-2.5 py-1" onClick={() => mover(i, 1)}
+              disabled={i === lista.length - 1} aria-label="Bajar">↓</button>
+          </li>
+        ))}
+      </ul>
+      <div className="px-4 py-3 border-t border-br">
+        <p className="text-micro text-t3 leading-relaxed mb-3">
+          Solo decide quién paga cuando dos llevan los mismos turnos. Quien menos
+          turnos tenga va siempre primero, esté donde esté en esta lista.
+        </p>
+        <button className="btn btn-ac w-full text-tiny" disabled={!cambiado}
+          onClick={async () => { await guardarOrden(lista); setGuardado(true); }}>
+          Guardar orden
         </button>
       </div>
     </div>
