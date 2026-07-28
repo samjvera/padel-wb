@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { deudas, repartir, nuevoId } from '../lib/ledger';
+import { deudas, repartir, saldos, nuevoId } from '../lib/ledger';
 import { colaDePago, elegirPagador } from '../lib/payments';
 import { guardarLedger } from '../lib/firebase';
 
@@ -129,7 +129,12 @@ export default function Cuentas({ ledger, players, pagos, week }) {
       {/* Dinero */}
       <div className="panel overflow-hidden">
         <div className="panel-cab">
-          <span className="t-eyebrow">Dinero llevado</span>
+          <div>
+            <span className="t-eyebrow">Billetes que se han puesto</span>
+            <p className="text-micro text-t3 mt-0.5 normal-case tracking-normal">
+              Quién entregó dinero, no de quién era el turno
+            </p>
+          </div>
         </div>
         <div>
           {pagosLista.length === 0 ? (
@@ -169,15 +174,22 @@ export default function Cuentas({ ledger, players, pagos, week }) {
 }
 
 function Rotacion({ players, mov, pagos, week, n }) {
-  const [abierto, setAbierto] = useState(false);
+  const [abierto, setAbierto] = useState(true);
   const orden = pagos?.order;
   const cola = colaDePago(players, mov, orden);
-  const confirmados = week?.confirmed || [];
+  const saldo = saldos(mov, cola.map(c => c.id));
   const asignado = week?.status === 'fijada'
     ? week?.payerId
     : elegirPagador(cola.map(c => c.id), players, mov, orden);
 
   if (!cola.length) return null;
+
+  const estado = id => {
+    const v = saldo[id] || 0;
+    if (v < -0.005) return { txt: `debe ${dinero(v)}`, cls: 'text-wn' };
+    if (v > 0.005) return { txt: `le deben ${dinero(v)}`, cls: 'text-ac' };
+    return { txt: 'al día', cls: 'text-t3' };
+  };
 
   return (
     <div className="panel overflow-hidden">
@@ -185,10 +197,10 @@ function Rotacion({ players, mov, pagos, week, n }) {
         <span className="t-eyebrow">
           {week?.status === 'fijada' ? 'Paga esta partida' : 'Le toca a'}
         </span>
-        <span className="t-num text-micro text-t3">{abierto ? '−' : 'ver cola'}</span>
+        <span className="t-num text-micro text-t3">{abierto ? '−' : '+'}</span>
       </button>
 
-      <div className="fila border-b-0">
+      <div className="fila">
         <span className="text-lg font-semibold flex-1">
           {asignado ? n(asignado) : 'Nadie de la rotación'}
         </span>
@@ -198,21 +210,30 @@ function Rotacion({ players, mov, pagos, week, n }) {
       </div>
 
       {abierto && (
-        <ul className="border-t border-br">
-          {cola.map((c, i) => (
-            <li key={c.id} className="fila">
-              <span className="t-num text-tiny text-t3 w-4">{i + 1}</span>
-              <span className="flex-1 text-base">{c.nombre}</span>
-              <span className="t-num text-tiny text-t2">
-                {c.veces} {c.veces === 1 ? 'turno' : 'turnos'}
-              </span>
-            </li>
-          ))}
-          <li className="panel-pie border-t-0">
-            Los turnos salen de las partidas registradas abajo. Si te toca y no
-            vas, tu contador no sube y sigues arriba.
-          </li>
-        </ul>
+        <>
+          <ul>
+            {cola.map((c, i) => {
+              const e = estado(c.id);
+              return (
+                <li key={c.id} className="fila">
+                  <span className="t-num text-tiny text-t3 w-4">{i + 1}</span>
+                  <span className="flex-1 text-base truncate">{c.nombre}</span>
+                  <span className="t-num text-tiny text-t2 w-16 text-right">
+                    {c.veces} {c.veces === 1 ? 'turno' : 'turnos'}
+                  </span>
+                  <span className={`t-num text-tiny w-24 text-right ${e.cls}`}>{e.txt}</span>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="panel-pie">
+            <b className="text-t2">Turnos</b> = veces que le ha tocado, contando las
+            partidas registradas abajo. Decide el orden de la cola.
+            <br />
+            <b className="text-t2">Al día</b> = ya no debe nada: o llevó su propio
+            dinero, o ya le devolvió a quien lo puso por él.
+          </p>
+        </>
       )}
     </div>
   );
