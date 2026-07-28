@@ -49,7 +49,7 @@ export default function Leaderboard({ session }) {
   return (
     <div className="panel p-4">
       <div className="flex items-baseline justify-between">
-        <p className="t-eyebrow">Tabla de la noche</p>
+        <p className="t-eyebrow">Tabla de la partida</p>
         <span className="t-num text-xs text-line/45">
           {rondasConResultado}/{rounds.length} rondas
         </span>

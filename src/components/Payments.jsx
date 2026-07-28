@@ -33,7 +33,7 @@ export default function Payments({ wid, week, players, pagos }) {
           </div>
         ) : (
           <div className="panel p-5">
-            <p className="t-display text-lg">Nadie de la rotación juega esta noche</p>
+            <p className="t-display text-lg">Nadie de la rotación juega esta semana</p>
             <p className="text-sm text-line/55 mt-1.5">
               Solo confirmaron mujeres o invitados. Decidan el pago entre ustedes —
               la rotación no avanza y todos conservan su turno.
@@ -44,7 +44,7 @@ export default function Payments({ wid, week, players, pagos }) {
         <div className="panel p-5">
           <p className="t-display text-lg">Aún no hay día fijado</p>
           <p className="text-sm text-line/55 mt-1.5">
-            El pagador se asigna en el momento en que se fija la noche.
+            El pagador se asigna en el momento en que se fija el día.
           </p>
         </div>
       )}

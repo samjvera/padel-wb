@@ -41,7 +41,7 @@ export default function MatchDay({ wid, week, session, players }) {
   return (
     <section className="space-y-5">
       <header>
-        <p className="t-eyebrow">Noche fijada</p>
+        <p className="t-eyebrow">Partida fijada</p>
         <h2 className="t-display text-3xl mt-1">{diaLabel}</h2>
         <p className="t-num text-flood mt-1">{slotLabel}</p>
         <button

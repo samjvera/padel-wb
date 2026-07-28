@@ -52,8 +52,13 @@ export function repartir(movimientos = []) {
 }
 
 /**
- * Quién le debe a quién, con el motivo.
- * Deuda = a ti te tocaba una noche y la pagó otro.
+ * Quién debe qué. Hay dos clases de deuda:
+ *
+ *   1. Con la cancha — tu partida no la ha pagado nadie todavía.
+ *      Es la más urgente: ese dinero no existe aún.
+ *   2. Con una persona — tu partida la pagó otro de su bolsillo.
+ *
+ * Las devoluciones solo borran las del segundo tipo.
  */
 export function deudas(movimientos = []) {
   const { cargos, sobrante, sinPagar } = repartir(movimientos);
@@ -68,9 +73,13 @@ export function deudas(movimientos = []) {
     mapa.set(k, e);
   };
 
+  const conLaCancha = new Map();   // deudor -> monto pendiente de poner
   for (const c of cargos) {
     for (const parte of c.cubiertoPor) {
       sumar(c.quien, parte.quien, parte.monto, c.semana || null);
+    }
+    if (c.restante > 0.005) {
+      conLaCancha.set(c.quien, (conLaCancha.get(c.quien) || 0) + c.restante);
     }
   }
 
@@ -90,12 +99,15 @@ export function deudas(movimientos = []) {
     }
   }
 
-  return {
-    lista: [...mapa.values()].filter(d => d.monto > 0.005)
-      .sort((a, b) => b.monto - a.monto),
-    sobrante,
-    sinPagar,
-  };
+  // Las deudas con la cancha van primero: son las que impiden jugar.
+  const pendientes = [...conLaCancha.entries()]
+    .map(([de, monto]) => ({ de, a: null, monto, motivos: [], cancha: true }))
+    .sort((a, b) => b.monto - a.monto);
+
+  const entrePersonas = [...mapa.values()].filter(d => d.monto > 0.005)
+    .sort((a, b) => b.monto - a.monto);
+
+  return { lista: [...pendientes, ...entrePersonas], pendientes, entrePersonas, sobrante, sinPagar };
 }
 
 /** Resumen por persona: cuánto le deben menos cuánto debe. */

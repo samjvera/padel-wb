@@ -76,7 +76,7 @@ export default function App() {
           : <Availability wid={wid} week={week} players={players} me={me} onFijar={onFijar} />)}
         {tab === 'partido' && (fijada
           ? <MatchDay wid={wid} week={week} session={session} players={players} />
-          : <Vacio titulo="Todavía no hay noche fijada"
+          : <Vacio titulo="Todavía no hay partida fijada"
               texto="Cuando se fije el día aquí aparece el americano completo." />)}
         {tab === 'pagos' && (
           <>
@@ -104,7 +104,7 @@ function Header({ wid, me, fijada, onCambiar }) {
       <div>
         <h1 className="t-display text-2xl">Cancha</h1>
         <p className="t-eyebrow mt-1">
-          {wid} · {fijada ? 'noche fijada' : 'recogiendo horarios'}
+          {wid} · {fijada ? 'partida fijada' : 'recogiendo horarios'}
         </p>
         <p className="t-eyebrow mt-0.5 text-line/30">se reinicia {cuando}</p>
       </div>

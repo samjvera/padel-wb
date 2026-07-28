@@ -313,27 +313,39 @@ Antes de armar el cuadro puedes añadir invitados. No entran en la rotación de 
 
 ## Las cuentas
 
-La pantalla muestra una sola cosa: **quién le debe a quién**. Y hay un solo botón:
-**Alguien llevó dinero**.
+La pantalla tiene tres bloques, siempre a la vista:
 
-Eso es todo lo que se usa cada semana. Cuatro toques: el botón, el nombre, el
-monto, guardar. No hay que elegir tipo de movimiento, ni destinatario, ni fecha.
+**Quién le debe a quién.** Hay dos clases de deuda y salen mezcladas, las más
+urgentes arriba:
 
-**Cómo lo deduce.** Cada noche que se juega queda anotada a nombre de quien le
-tocaba pagar —se crea sola al fijar el día—. Cuando alguien lleva un billete, ese
-dinero va tapando las noches pendientes de la más vieja a la más nueva, igual que
-en la vida real. Si Matías lleva $50 y con eso se cubren la noche de Santiago, la
-de Samuel y la mitad de la suya, la app concluye que Santiago le debe $20 a Matías
-y Samuel otros $20.
+- **Fulano → la cancha.** Su partida no la ha pagado nadie todavía. Ese dinero no
+  existe: alguien tiene que llevarlo. Cuando lo lleve, tocas **ya llevó**.
+- **Fulano → Mengano.** Su partida la pagó otro de su bolsillo. Cuando le
+  devuelva la plata, tocas **ya pagó**.
 
-Cuando alguien salda su deuda, tocas **ya pagó** al lado y desaparece.
+Las dos desaparecen solas al saldarse.
 
-Debajo, **+ detalles y correcciones** despliega lo que casi nunca hace falta:
-cambiar el precio de la noche, añadir noches viejas a mano, ver qué billete pagó
-qué noche, y borrar movimientos mal metidos.
+**Partidas.** Cada partida jugada, con la fecha, a quién le tocaba pagarla y si
+está pagada o no. Se añaden solas al fijar el día en la pestaña Semana. Para
+cargar partidas antiguas, el botón **Añadir partida anterior** está debajo de la
+lista — y la partida nueva aparece ahí mismo al guardarla.
 
-La app avisa si faltan noches por pagar, y si hay dinero adelantado te dice
-cuántas noches cubre.
+**Dinero llevado.** Quién ha puesto billetes y de cuánto. El botón **Alguien
+llevó dinero** es lo único que vas a usar cada semana: cuatro toques —el botón,
+el nombre, el monto, guardar—.
+
+Todo se puede borrar con la × de su fila.
+
+**Cómo saca las deudas.** Cada partida tiene dueño: aquel a quien le tocaba
+pagarla. Cuando alguien lleva un billete, ese dinero va tapando las partidas
+pendientes de la más vieja a la más nueva, igual que en la vida real. Si Matías
+lleva $50 y con eso se cubren la partida de Santiago, la de Samuel y la mitad de
+la suya, la app deduce que Santiago le debe $20 a Matías y Samuel otros $20.
+
+Por eso importa registrar la partida **a nombre de quien le tocaba**, aunque haya
+pagado otro. Es esa separación la que hace que la deuda aparezca sola.
+
+En **+ ajustes** se cambia el precio de la partida.
 
 ## No hay avisos automáticos
 
@@ -344,7 +356,7 @@ grupo**: arma el texto con el estado actual —qué horario va ganando, quién f
 por marcar, o la alineación y quién paga— y lo deja copiado para pegarlo en
 WhatsApp.
 
-Al fijar la noche, **Añadir al calendario** baja el evento al teléfono con avisos
+Al fijar el día, **Añadir al calendario** baja el evento al teléfono con avisos
 3 horas y 30 minutos antes.
 
 **Lo que implica:** si nadie abre la app, nadie se entera. Alguien tiene que
@@ -456,7 +468,7 @@ En Firebase → **Firestore Database** → pestaña **Datos** → colección `pl
   `gender` con valor `M` o `F`. Si es hombre y quieres que pague su turno,
   añádelo además a `meta` → `payments` → `order`.
 
-Para invitados de una noche no hace falta nada: se añaden desde la app.
+Para invitados de una partida no hace falta nada: se añaden desde la app.
 
 ---
 
@@ -502,7 +514,7 @@ Paga **quien menos veces ha pagado**; si hay empate, el que esté antes en el or
 que definiste. Si te toca y no vas, no pierdes el turno: sigues arriba hasta que
 juegues.
 
-Mujeres e invitados quedan fuera del cálculo. Si una noche solo confirman mujeres
+Mujeres e invitados quedan fuera del cálculo. Si una partida solo confirman mujeres
 e invitados, la app lo dice y nadie avanza en la cola.
 
 ## Cualquiera con el enlace puede entrar
