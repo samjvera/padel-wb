@@ -4,20 +4,28 @@ export default {
   theme: {
     extend: {
       colors: {
-        paper:  '#F2F1ED',   // cartulina, el fondo
-        card:   '#FBFAF7',   // el papel de encima
-        ink:    '#171A1E',   // tinta negra azulada
-        ink2:   '#5A6068',   // tinta gastada, texto secundario
-        rule:   '#C7C4BB',   // filetes impresos
-        stamp:  '#B33A2B',   // tampón rojo — el único acento
-        court:  '#2F6B7A',   // azul de pista, solo en el dibujo
+        bg:  '#0C1016',   // base
+        s1:  '#141A22',   // filas y tarjetas
+        s2:  '#1B2029',   // elevado / seleccionado
+        s3:  '#232935',   // encima de lo elevado
+        br:  '#242B36',   // bordes
+        tx:  '#EDF1F5',   // texto
+        t2:  '#8A94A4',   // texto secundario
+        t3:  '#5B6472',   // texto terciario
+        ac:  '#22C57E',   // verde: acción y estado
+        wn:  '#F0A63C',   // ámbar: avisos y deudas
+        ct:  '#2E86C1',   // azul: solo la cancha
       },
       fontFamily: {
-        display: ['Archivo', 'system-ui', 'sans-serif'],
-        sans: ['"Instrument Sans"', 'system-ui', 'sans-serif'],
-        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+        sans: ['"Inter Tight"', 'system-ui', 'sans-serif'],
+        num:  ['"Roboto Mono"', 'ui-monospace', 'monospace'],
       },
-      borderRadius: { DEFAULT: '2px', lg: '3px', xl: '4px' },
+      fontSize: {
+        micro: ['0.6875rem', { lineHeight: '1rem' }],
+        tiny:  ['0.75rem',   { lineHeight: '1.05rem' }],
+        base:  ['0.875rem',  { lineHeight: '1.25rem' }],
+        lg:    ['1rem',      { lineHeight: '1.35rem' }],
+      },
     },
   },
   plugins: [],

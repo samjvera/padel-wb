@@ -38,7 +38,7 @@ export default function Historial({ sesiones = [], semanas = {}, actual }) {
     <div>
       <div className="flex items-baseline justify-between mb-2">
         <p className="t-section">Partidas anteriores</p>
-        <span className="t-num text-xs text-ink/35">{pasadas.length}</span>
+        <span className="t-num text-xs text-tx/35">{pasadas.length}</span>
       </div>
 
       <div className="panel p-4">
@@ -47,40 +47,41 @@ export default function Historial({ sesiones = [], semanas = {}, actual }) {
             const ganador = s.tabla[0];
             const abierto = abierta === s.id;
             return (
-              <li key={s.id} className="border-b border-rule/25 last:border-0">
+              <li key={s.id} className="border-b border-br/25 last:border-0">
                 <button className="w-full flex items-center gap-3 py-3 text-left"
                   onClick={() => setAbierta(abierto ? null : s.id)}>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm">{cuando(s.id, semanas[s.id])}</p>
-                    <p className="t-num text-xs text-ink/40">
+                    <p className="text-base">{cuando(s.id, semanas[s.id])}</p>
+                    <p className="t-num text-micro text-t3">
                       {horario(semanas[s.id]) && `${horario(semanas[s.id])} · `}
                       {s.tabla.length} jugadores · {s.conResultado} rondas
                     </p>
                   </div>
-                  <span className="text-sm truncate max-w-[8rem]">{ganador?.p}</span>
-                  <span className="sello">gana</span>
-                  <span className="t-num text-xs text-ink/30">{abierto ? '−' : '+'}</span>
+                  <span className="text-tiny truncate max-w-[7rem] text-t2">{ganador?.p}</span>
+                  <span className="badge badge-ac">1º</span>
+                  <span className="t-num text-micro text-t3">{abierto ? '−' : '+'}</span>
                 </button>
 
                 {abierto && (
-                  <table className="w-full text-sm pb-3">
+                  <table className="tabla pb-2">
                     <thead>
-                      <tr className="t-eyebrow text-left">
-                        <th className="font-normal pb-1 w-5"></th>
-                        <th className="font-normal pb-1">Jugador</th>
-                        <th className="font-normal pb-1 text-right">G-P-E</th>
-                        <th className="font-normal pb-1 text-right">Pts</th>
+                      <tr>
+                        <th className="w-7"></th>
+                        <th>Jugador</th>
+                        <th>G</th>
+                        <th>P</th>
+                        <th className="pr-3.5">Pts</th>
                       </tr>
                     </thead>
-                    <tbody className="rayado">
+                    <tbody>
                       {s.tabla.map((r, i) => (
-                        <tr key={r.p} className="border-t border-rule/20">
-                          <td className="t-num py-1.5 text-ink/35 text-xs">{i + 1}</td>
-                          <td className={`py-1.5 ${i === 0 ? 'text-stamp' : ''}`}>{r.p}</td>
-                          <td className="t-num py-1.5 text-right text-ink/50 whitespace-nowrap">
+                        <tr key={r.p} className="border-t border-br/20">
+                          <td className="t-num py-1.5 text-tx/35 text-xs">{i + 1}</td>
+                          <td className={`py-1.5 ${i === 0 ? 'text-ac' : ''}`}>{r.p}</td>
+                          <td className="t-num py-1.5 text-right text-tx/50 whitespace-nowrap">
                             {r.g}-{r.pe}-{r.e}
                           </td>
-                          <td className={`t-num py-1.5 text-right ${i === 0 ? 'text-stamp font-semibold' : ''}`}>
+                          <td className={`t-num py-1.5 text-right ${i === 0 ? 'text-ac font-semibold' : ''}`}>
                             {r.total}
                           </td>
                         </tr>

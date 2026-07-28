@@ -43,7 +43,7 @@ export default function MatchDay({ wid, week, session, players }) {
       <header>
         <p className="t-section">Partida fijada</p>
         <h2 className="t-display text-3xl mt-1">{diaLabel}</h2>
-        <p className="t-num text-stamp mt-1">{slotLabel}</p>
+        <p className="t-num text-ac mt-1">{slotLabel}</p>
         <button
           className="btn btn-ghost w-full mt-4 text-sm"
           onClick={() => descargar(icsPartido({
@@ -95,13 +95,13 @@ function Roster({ confirmed, players }) {
     <div className="panel p-4">
       <div className="flex items-baseline justify-between">
         <p className="t-eyebrow">En la cancha</p>
-        <span className="t-num text-stamp text-lg">{confirmed.length}</span>
+        <span className="t-num text-ac text-lg">{confirmed.length}</span>
       </div>
       <div className="flex flex-wrap gap-1.5 mt-3">
         {confirmed.map(id => (
           <span key={id} className="chip">
             {players[id]?.name ?? id}
-            {players[id]?.isGuest && <span className="text-stamp ml-1">inv</span>}
+            {players[id]?.isGuest && <span className="text-ac ml-1">inv</span>}
           </span>
         ))}
       </div>
@@ -109,19 +109,19 @@ function Roster({ confirmed, players }) {
       {open ? (
         <div className="mt-4 space-y-2">
           <input
-            className="w-full bg-card border border-ink/25 rounded-sm px-3 py-2 text-sm"
+            className="w-full bg-s1 border border-br/25 rounded-sm px-3 py-2 text-sm"
             placeholder="Nombre del invitado" value={name}
             onChange={e => setName(e.target.value)} autoFocus
           />
           <div className="flex gap-2">
             {['M', 'F'].map(g => (
               <button key={g} onClick={() => setGender(g)}
-                className={`chip flex-1 py-2 ${gender === g ? 'bg-stamp text-paper border-stamp' : ''}`}>
+                className={`chip flex-1 py-2 ${gender === g ? 'bg-ac text-bg border-ac' : ''}`}>
                 {g === 'M' ? 'Hombre' : 'Mujer'}
               </button>
             ))}
           </div>
-          <p className="text-xs text-ink/45">
+          <p className="text-xs text-tx/45">
             Los invitados no entran en la rotación de pago.
           </p>
           <div className="flex gap-2">
@@ -129,7 +129,7 @@ function Roster({ confirmed, players }) {
               Cancelar
             </button>
             <button
-              className="btn btn-stamp flex-1 text-sm"
+              className="btn btn-ac flex-1 text-sm"
               disabled={!name.trim()}
               onClick={async () => { await addGuest(name, gender); setName(''); setOpen(false); }}
             >
@@ -157,7 +157,7 @@ function Setup({ n, puntos, setPuntos, rondas, setRondas, generar, gen }) {
         <div className="flex gap-2 mt-2">
           {PUNTOS.map(p => (
             <button key={p} onClick={() => setPuntos(p)}
-              className={`chip flex-1 py-2 t-num ${p === puntos ? 'bg-stamp text-paper border-stamp' : ''}`}>
+              className={`chip flex-1 py-2 t-num ${p === puntos ? 'bg-ac text-bg border-ac' : ''}`}>
               {p}
             </button>
           ))}
@@ -167,24 +167,24 @@ function Setup({ n, puntos, setPuntos, rondas, setRondas, generar, gen }) {
       <div>
         <div className="flex items-baseline justify-between">
           <p className="t-eyebrow">Rondas</p>
-          <span className="t-num text-stamp">{rondas}</span>
+          <span className="t-num text-ac">{rondas}</span>
         </div>
-        <input type="range" min="3" max="16" value={rondas} className="w-full mt-2 accent-stamp"
+        <input type="range" min="3" max="16" value={rondas} className="w-full mt-2 accent-ac"
           onChange={e => setRondas(Number(e.target.value))} />
-        <p className={`text-xs mt-1 ${largo ? 'text-stamp' : 'text-ink/45'}`}>
+        <p className={`text-xs mt-1 ${largo ? 'text-ac' : 'text-tx/45'}`}>
           ≈ {minutos} min de juego · {largo ? 'se pasa del bloque de 90 min' : 'cabe en el bloque'}
         </p>
       </div>
 
       {n > 6 && (
-        <p className="text-xs text-stamp/90 leading-relaxed">
+        <p className="text-xs text-ac/90 leading-relaxed">
           Con {n} jugadores en una cancha, cada uno se sienta {' '}
           {Math.round((1 - 4 / n) * 100)}% de las rondas. Los puntos M+ compensan el marcador,
           no el tiempo en la banca.
         </p>
       )}
 
-      <button className="btn btn-stamp w-full" onClick={generar} disabled={n < 4 || gen}>
+      <button className="btn btn-ac w-full" onClick={generar} disabled={n < 4 || gen}>
         {gen ? 'Armando…' : n < 4 ? 'Faltan jugadores' : 'Armar americano'}
       </button>
     </div>
@@ -202,8 +202,10 @@ function Round({ wid, idx, round, result, puntos }) {
   return (
     <div className="panel p-4">
       <div className="flex items-baseline justify-between mb-1">
-        <p className="t-eyebrow">Ronda {round.round}</p>
-        {done && <span className="t-num text-xs text-stamp">jugada</span>}
+        <span className="t-eyebrow">Ronda {round.round}</span>
+        {done
+          ? <span className="badge badge-ac">jugada</span>
+          : <span className="badge badge-off">pendiente</span>}
       </div>
 
       <CourtDiagram
@@ -212,7 +214,7 @@ function Round({ wid, idx, round, result, puntos }) {
       />
 
       {round.resting?.length > 0 && (
-        <p className="text-xs text-ink/45 mt-2">
+        <p className="text-xs text-tx/45 mt-2">
           Descansan: {round.resting.join(', ')}
         </p>
       )}
@@ -222,10 +224,10 @@ function Round({ wid, idx, round, result, puntos }) {
           type="number" inputMode="numeric" min="0" max={puntos} value={a}
           onChange={e => setA(e.target.value)}
           placeholder={`0–${puntos}`}
-          className="t-num w-24 bg-card border border-ink/25 rounded-sm px-3 py-2 text-center"
+          className="t-num w-24 bg-s1 border border-br/25 rounded-sm px-3 py-2 text-center"
           aria-label={`Puntos de ${round.teamA.join(' y ')}`}
         />
-        <span className="t-num text-ink/45 text-sm">
+        <span className="t-num text-tx/45 text-sm">
           → {valido ? puntos - na : '—'} para {round.teamB.join(' y ')}
         </span>
         <button className="btn btn-ghost ml-auto text-sm py-2" onClick={guardar} disabled={!valido}>

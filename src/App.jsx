@@ -73,14 +73,14 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-dvh max-w-lg mx-auto px-4 pb-28 pt-6">
+    <div className="min-h-dvh max-w-lg mx-auto px-3 pb-24 pt-4">
       <Header wid={wid} me={me} fijada={fijada}
         onCambiar={() => { olvidarYo(); setYo(null); }} />
 
       {fallo && (
-        <div className="mt-4 p-3 border-l-2 border-stamp bg-stamp/5">
-          <p className="text-sm text-stamp leading-relaxed">{fallo}</p>
-          <button className="t-eyebrow text-stamp/70 mt-2" onClick={() => setFallo(null)}>
+        <div className="mt-4 p-3 border-l-2 border-ac bg-ac/5">
+          <p className="text-sm text-ac leading-relaxed">{fallo}</p>
+          <button className="t-eyebrow text-ac/70 mt-2" onClick={() => setFallo(null)}>
             cerrar
           </button>
         </div>
@@ -121,15 +121,19 @@ function Header({ wid, me, fijada, onCambiar }) {
     : dias === 1 ? 'mañana' : `en ${dias} días`;
 
   return (
-    <header className="flex items-start justify-between">
-      <div>
-        <h1 className="t-display text-2xl">Cancha</h1>
-        <p className="t-eyebrow mt-1">
-          {wid} · {fijada ? 'partida fijada' : 'recogiendo horarios'}
+    <header className="flex items-center justify-between gap-3 mb-4">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <h1 className="t-display text-lg">Cancha</h1>
+          <span className={`badge ${fijada ? 'badge-ac' : 'badge-off'}`}>
+            {fijada ? 'fijada' : 'abierta'}
+          </span>
+        </div>
+        <p className="t-num text-micro text-t3 mt-0.5">
+          {wid} · se reinicia {cuando}
         </p>
-        <p className="t-eyebrow mt-0.5 text-ink/30">se reinicia {cuando}</p>
       </div>
-      <button onClick={onCambiar} className="chip text-ink/60" title="No soy yo">
+      <button onClick={onCambiar} className="chip shrink-0" title="No soy yo">
         {me?.name}
       </button>
     </header>
@@ -139,14 +143,15 @@ function Header({ wid, me, fijada, onCambiar }) {
 function Nav({ tab, setTab }) {
   const tabs = [['semana', 'Semana'], ['partido', 'Partido'], ['pagos', 'Cuentas']];
   return (
-    <nav className="fixed bottom-0 inset-x-0 pb-[env(safe-area-inset-bottom)]
-      bg-card border-t border-rule">
+    <nav className="navbar fixed bottom-0 inset-x-0 pb-[env(safe-area-inset-bottom)]">
       <div className="max-w-lg mx-auto grid grid-cols-3">
         {tabs.map(([id, label]) => (
-          <button key={id} onClick={() => setTab(id)}
-            className={`py-4 t-eyebrow transition-colors ${
-              tab === id ? 'text-stamp' : 'text-ink2'}`}>
-            {label}
+          <button key={id} onClick={() => setTab(id)} aria-current={tab === id}
+            className="py-3 relative">
+            <span className={`t-eyebrow ${tab === id ? 'text-ac' : 'text-t3'}`}>{label}</span>
+            {tab === id && (
+              <span className="absolute inset-x-6 top-0 h-0.5 bg-ac rounded-full" />
+            )}
           </button>
         ))}
       </div>
@@ -160,13 +165,13 @@ function YaFijada({ week, players, onReabrir }) {
       <div className="panel p-5">
         <p className="t-eyebrow">Semana cerrada</p>
         <p className="t-display text-2xl mt-2">Ya hay día fijado</p>
-        <p className="text-sm text-ink/55 mt-2">
+        <p className="text-sm text-tx/55 mt-2">
           {(week.confirmed || []).length} jugadores confirmados. Ve a Partido para el americano.
         </p>
         <button className="btn btn-ghost w-full mt-4 text-sm" onClick={onReabrir}>
           Reabrir horarios
         </button>
-        <p className="text-xs text-ink/45 mt-2">
+        <p className="text-xs text-tx/45 mt-2">
           Reabrir borra el día fijado y el pagador asignado. El americano generado se mantiene.
         </p>
       </div>
@@ -178,7 +183,7 @@ function Vacio({ titulo, texto }) {
   return (
     <div className="panel p-6 text-center">
       <p className="t-display text-lg">{titulo}</p>
-      <p className="text-sm text-ink/55 mt-2">{texto}</p>
+      <p className="text-sm text-tx/55 mt-2">{texto}</p>
     </div>
   );
 }
@@ -188,8 +193,8 @@ function FaltaConfig() {
     <div className="min-h-dvh grid place-items-center px-6">
       <div className="max-w-sm">
         <h1 className="t-display text-2xl">Falta conectar Firebase</h1>
-        <p className="text-sm text-ink/60 mt-3 leading-relaxed">
-          Abre el archivo <span className="t-num text-stamp">src/config.js</span> en
+        <p className="text-sm text-tx/60 mt-3 leading-relaxed">
+          Abre el archivo <span className="t-num text-ac">src/config.js</span> en
           tu repositorio de GitHub y pega ahí los datos de tu proyecto de Firebase.
           Es el paso 5 del README.
         </p>
@@ -231,23 +236,23 @@ function QuienEres({ players, onElegir }) {
     <div className="min-h-dvh max-w-lg mx-auto px-6 py-12">
       <h1 className="t-display text-4xl leading-none">Cancha</h1>
       <p className="t-eyebrow mt-5">¿Cómo te llamas?</p>
-      <p className="text-sm text-ink/55 mt-2 leading-relaxed">
+      <p className="text-sm text-tx/55 mt-2 leading-relaxed">
         Escribe tu nombre y ya estás dentro. Se queda guardado en este teléfono.
       </p>
 
       <div className="flex gap-2 mt-5">
         <input
-          className="flex-1 bg-paper/60 border border-rule/50 rounded-lg px-3 py-3"
+          className="flex-1 bg-bg/60 border border-br/50 rounded-lg px-3 py-3"
           value={nombre} onChange={e => setNombre(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && entrar()}
           placeholder="Tu nombre" autoFocus maxLength={20}
         />
-        <button className="btn btn-stamp px-5" disabled={!nombre.trim() || ocupado}
+        <button className="btn btn-ac px-5" disabled={!nombre.trim() || ocupado}
           onClick={() => entrar()}>
           Entrar
         </button>
       </div>
-      {error && <p className="text-xs text-stamp mt-2">{error}</p>}
+      {error && <p className="text-xs text-ac mt-2">{error}</p>}
 
       {conocidos.length > 0 && (
         <>
@@ -261,7 +266,7 @@ function QuienEres({ players, onElegir }) {
         </>
       )}
 
-      <p className="text-xs text-ink/40 mt-8 leading-relaxed">
+      <p className="text-xs text-tx/40 mt-8 leading-relaxed">
         Si escribes un nombre que ya existe, entras como esa persona. Los nombres
         nuevos se añaden como invitados y no entran en la rotación de pago.
       </p>
@@ -274,10 +279,10 @@ function SinPermiso() {
     <div className="min-h-dvh grid place-items-center px-6">
       <div className="max-w-sm">
         <h1 className="t-display text-2xl">Firestore está bloqueado</h1>
-        <p className="text-sm text-ink/60 mt-3 leading-relaxed">
+        <p className="text-sm text-tx/60 mt-3 leading-relaxed">
           Las reglas de seguridad no se publicaron. Vuelve al Paso 4 del README:
           Firestore Database → pestaña Reglas → pega el contenido de
-          <span className="t-num text-stamp"> firestore.rules</span> → Publicar.
+          <span className="t-num text-ac"> firestore.rules</span> → Publicar.
         </p>
       </div>
     </div>

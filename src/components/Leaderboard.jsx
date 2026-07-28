@@ -8,64 +8,58 @@ export default function Leaderboard({ session }) {
 
   if (rondasConResultado === 0) {
     return (
-      <div className="panel p-5 text-center">
-        <p className="t-display text-lg">Sin resultados aún</p>
-        <p className="text-sm text-ink/55 mt-1.5">
-          Anota el marcador de la ronda 1 y la tabla aparece aquí.
+      <div className="panel px-3.5 py-6 text-center">
+        <p className="t-eyebrow">Clasificación</p>
+        <p className="text-tiny text-t3 mt-2">
+          Anota el marcador de la ronda 1 y aparece aquí.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="panel p-4">
-      <div className="flex items-baseline justify-between">
-        <p className="t-section">Tabla de la partida</p>
-        <span className="t-num text-xs text-ink/45">
+    <div className="panel overflow-hidden">
+      <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-br">
+        <span className="t-eyebrow">Clasificación</span>
+        <span className="t-num text-micro text-t3">
           {rondasConResultado}/{rounds.length} rondas
         </span>
       </div>
 
-      <table className="w-full mt-3 text-sm">
+      <table className="tabla">
         <thead>
-          <tr className="t-eyebrow text-left">
-            <th className="font-normal pb-1.5 w-6"></th>
-            <th className="font-normal pb-1.5">Jugador</th>
-            <th className="font-normal pb-1.5 text-right">G-P-E</th>
-            {hayMplus && <th className="font-normal pb-1.5 text-right">M+</th>}
-            <th className="font-normal pb-1.5 text-right">Dif</th>
-            <th className="font-normal pb-1.5 text-right">Pts</th>
+          <tr>
+            <th className="w-7">#</th>
+            <th>Jugador</th>
+            <th>PJ</th>
+            <th>G</th>
+            <th>P</th>
+            {hayMplus && <th>M+</th>}
+            <th>Dif</th>
+            <th className="pr-3.5">Pts</th>
           </tr>
         </thead>
-        <tbody className="rayado">
+        <tbody>
           {tabla.map((r, i) => (
-            <tr key={r.p} className="border-t border-rule/25">
-              <td className="t-num py-2 text-ink/40 text-xs">{i + 1}</td>
-              <td className={`py-2 ${i === 0 ? 'text-stamp font-semibold' : ''}`}>{r.p}</td>
-              <td className="t-num py-2 text-right text-ink/55 whitespace-nowrap">
-                {r.g}-{r.pe}-{r.e}
-              </td>
+            <tr key={r.p} className={i === 0 ? 'bg-ac/[0.06]' : ''}>
+              <td className="t-num text-t3 pl-3.5">{i + 1}</td>
+              <td className={`font-${i === 0 ? 'semibold' : 'normal'} whitespace-nowrap`}>{r.p}</td>
+              <td className="t-num text-t2">{r.jugadas}</td>
+              <td className="t-num text-t2">{r.g}</td>
+              <td className="t-num text-t2">{r.pe}</td>
               {hayMplus && (
-                <td className="t-num py-2 text-right text-ink/55">
-                  {r.mplus > 0 ? `+${r.mplus}` : '—'}
-                </td>
+                <td className="t-num text-t2">{r.mplus > 0 ? `+${r.mplus}` : '·'}</td>
               )}
-              <td className="t-num py-2 text-right text-ink/55">
-                {r.diff > 0 ? `+${r.diff}` : r.diff}
-              </td>
-              <td className={`t-num py-2 text-right font-semibold ${i === 0 ? 'text-stamp' : ''}`}>
-                {r.total}
-              </td>
+              <td className="t-num text-t2">{r.diff > 0 ? `+${r.diff}` : r.diff}</td>
+              <td className={`t-num pr-3.5 font-semibold ${i === 0 ? 'text-ac' : ''}`}>{r.total}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <p className="text-xs text-ink/45 mt-3 leading-relaxed">
-        G-P-E = ganados, perdidos, empatados. A igualdad de puntos desempata quien
-        ganó más partidos.
-        {hayMplus && ` M+ compensa a quien jugó menos rondas: ${promedioRonda} puntos
-        por cada ronda que se perdió, el promedio de lo que reparte un partido.`}
+      <p className="text-micro text-t3 px-3.5 py-2.5 border-t border-br leading-relaxed">
+        Desempata por victorias.
+        {hayMplus && ` M+ compensa a quien jugó menos rondas: ${promedioRonda} pts por ronda perdida.`}
       </p>
     </div>
   );

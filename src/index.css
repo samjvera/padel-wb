@@ -2,16 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Hoja de resultados de club: cartulina, tinta y un tampón.
-   Sin degradados, sin cristal, sin sombras. Lo que hay es papel. */
+/* App de resultados deportivos: densa, tabular, sin decoración.
+   La jerarquía la dan cuatro niveles planos de superficie, no sombras
+   ni degradados. El color se reserva para estado y acción. */
 
 :root {
-  --paper: #F2F1ED;
-  --card:  #FBFAF7;
-  --ink:   #171A1E;
-  --ink2:  #5A6068;
-  --rule:  #C7C4BB;
-  --stamp: #B33A2B;
+  --bg: #0C1016;
+  --s1: #141A22;
+  --s2: #1B2029;
+  --s3: #232935;
+  --br: #242B36;
+  --tx: #EDF1F5;
+  --t2: #8A94A4;
+  --t3: #5B6472;
+  --ac: #22C57E;
+  --wn: #F0A63C;
 }
 
 @layer base {
@@ -19,136 +24,144 @@
   body {
     margin: 0;
     min-height: 100dvh;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: 'Instrument Sans', system-ui, sans-serif;
-    font-size: 15px;
-    line-height: 1.45;
+    background: var(--bg);
+    color: var(--tx);
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: 'cv11', 'ss01';
   }
-  :focus-visible { outline: 2px solid var(--stamp); outline-offset: 2px; }
-  table { font-variant-numeric: tabular-nums; }
+  :focus-visible { outline: 2px solid var(--ac); outline-offset: 1px; border-radius: 3px; }
+  table { font-variant-numeric: tabular-nums; border-collapse: collapse; }
+  input, button { font-family: inherit; }
 }
 
 @layer components {
-  /* Condensada y en caja alta, como la rotulación de un cuadro de torneo */
+  /* ---- tipografía ---- */
   .t-display {
-    font-family: Archivo, system-ui, sans-serif;
-    font-variation-settings: 'wdth' 79, 'wght' 800;
-    text-transform: uppercase;
-    letter-spacing: 0.005em;
-    line-height: 0.95;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
   }
-
-  /* Los rótulos NO son monoespaciados: eso era el tic delator.
-     Van en la misma sans, apretados, con un filete al lado. */
-  .t-eyebrow {
+  /* Rótulo de sección: micro, versalita, sin filete decorativo */
+  .t-eyebrow, .t-section {
+    display: block;
     font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.09em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--ink2);
+    color: var(--t2);
   }
-  /* Rótulo de sección con filete que ocupa el resto del ancho */
-  .t-section {
+  .t-num {
+    font-family: 'Roboto Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* ---- superficies ---- */
+  .panel {
+    background: var(--s1);
+    border: 1px solid var(--br);
+    border-radius: 10px;
+  }
+  /* Fila de lista: la unidad básica de una app de resultados */
+  .fila {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.09em;
+    gap: 0.75rem;
+    min-height: 46px;
+    padding: 0.5rem 0.875rem;
+    border-bottom: 1px solid var(--br);
+  }
+  .fila:last-child { border-bottom: 0; }
+  .fila-tap { transition: background 0.1s linear; }
+  .fila-tap:active { background: var(--s2); }
+
+  /* ---- estado ---- */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
-    color: var(--ink2);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    line-height: 1;
   }
-  .t-section::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--rule);
-  }
+  .badge-ac { background: rgba(34,197,126,0.14); color: var(--ac); }
+  .badge-wn { background: rgba(240,166,60,0.14); color: var(--wn); }
+  .badge-off { background: var(--s3); color: var(--t2); }
 
-  /* El monoespaciado se reserva para cifras. Ahí sí aporta. */
-  .t-num {
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-variant-numeric: tabular-nums;
+  /* ---- controles ---- */
+  .btn {
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: -0.01em;
+    border-radius: 9px;
+    padding: 0.72rem 1rem;
+    transition: background 0.12s linear, opacity 0.12s linear;
   }
-
-  /* Filete doble, como el que cierra una sección en un impreso */
-  .court-rule {
-    border-top: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
-    height: 3px;
-  }
-
-  .panel {
-    background: var(--card);
-    border: 1px solid var(--rule);
-    border-radius: 2px;
-  }
+  .btn-ac { background: var(--ac); color: #06130C; }
+  .btn-ac:active { background: #1BAA6B; }
+  .btn-ghost { background: var(--s2); color: var(--tx); border: 1px solid var(--br); }
+  .btn-ghost:active { background: var(--s3); }
+  .btn:disabled { opacity: 0.3; pointer-events: none; }
 
   .chip {
-    border: 1px solid var(--rule);
-    background: var(--card);
-    border-radius: 2px;
-    padding: 0.3rem 0.6rem;
+    background: var(--s2);
+    border: 1px solid var(--br);
+    border-radius: 7px;
+    padding: 0.4rem 0.7rem;
     font-size: 0.8125rem;
     font-weight: 500;
-  }
-
-  .btn {
-    font-family: Archivo, system-ui, sans-serif;
-    font-variation-settings: 'wdth' 85, 'wght' 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-radius: 2px;
-    padding: 0.7rem 1.1rem;
-    transition: background 0.12s linear, color 0.12s linear;
-  }
-  .btn-stamp {
-    background: var(--stamp);
-    color: var(--card);
-    border: 1px solid var(--stamp);
-  }
-  .btn-stamp:hover { background: #9C3125; }
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--ink);
-    color: var(--ink);
-  }
-  .btn-ghost:hover { background: rgba(23, 26, 30, 0.06); }
-  .btn:disabled { opacity: 0.35; pointer-events: none; }
-
-  /* Casillas de disponibilidad: cuadrícula de impreso */
-  .cell {
-    border: 1px solid var(--rule);
-    background: var(--card);
-    border-radius: 1px;
-    min-height: 44px;
+    color: var(--tx);
     transition: background 0.1s linear;
   }
-  .cell[data-on='true'] {
-    background: var(--stamp);
-    border-color: var(--stamp);
-    color: var(--card);
+  .chip:active { background: var(--s3); }
+
+  /* Casilla de la cuadrícula de disponibilidad */
+  .cell {
+    background: var(--s1);
+    border: 1px solid var(--br);
+    border-radius: 7px;
+    min-height: 42px;
+    transition: background 0.1s linear, border-color 0.1s linear;
   }
-  .cell[data-best='true'] { border-color: var(--ink); }
+  .cell[data-on='true'] {
+    background: var(--ac);
+    border-color: var(--ac);
+    color: #06130C;
+  }
+  .cell[data-best='true'] { border-color: var(--ac); }
 
-  /* Filas alternas, como un cuadro de puntuación */
-  .rayado > *:nth-child(odd) { background: rgba(23, 26, 30, 0.028); }
-
-  /* El sello. Un solo gesto, y por eso funciona. */
-  .sello {
-    display: inline-block;
-    border: 2px solid var(--stamp);
-    color: var(--stamp);
-    border-radius: 2px;
-    padding: 0.1rem 0.45rem;
-    font-family: Archivo, system-ui, sans-serif;
-    font-variation-settings: 'wdth' 85, 'wght' 800;
-    font-size: 0.6875rem;
-    letter-spacing: 0.1em;
+  /* ---- tabla de clasificación ---- */
+  .tabla { width: 100%; font-size: 0.8125rem; }
+  .tabla thead th {
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
-    transform: rotate(-4deg);
-    opacity: 0.9;
+    color: var(--t3);
+    padding: 0.5rem 0.4rem;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .tabla thead th:nth-child(-n+2) { text-align: left; }
+  .tabla tbody td { padding: 0.55rem 0.4rem; text-align: right; }
+  .tabla tbody td:nth-child(-n+2) { text-align: left; }
+  .tabla tbody tr { border-top: 1px solid var(--br); }
+  .tabla tbody tr:first-child { border-top: 1px solid var(--br); }
+
+  /* separador entre bloques */
+  .court-rule { height: 1px; background: var(--br); }
+
+  /* barra inferior */
+  .navbar {
+    background: rgba(12,16,22,0.94);
+    backdrop-filter: saturate(140%) blur(12px);
+    border-top: 1px solid var(--br);
   }
 }
 

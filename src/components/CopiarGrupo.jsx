@@ -18,8 +18,8 @@ export default function CopiarGrupo({ texto, etiqueta = 'Copiar mensaje para el 
           : etiqueta}
       </button>
       {estado === 'error' && (
-        <pre className="mt-2 p-3 text-xs bg-paper/60 border border-rule/40 rounded-lg
-          whitespace-pre-wrap select-all font-mono text-ink/80">{texto}</pre>
+        <pre className="mt-2 p-3 text-xs bg-bg/60 border border-br/40 rounded-lg
+          whitespace-pre-wrap select-all font-mono text-tx/80">{texto}</pre>
       )}
     </div>
   );
