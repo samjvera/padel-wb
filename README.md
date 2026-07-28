@@ -1,4 +1,4 @@
-# Cancha
+# Padel
 
 App para organizar los pádel del grupo: quién puede qué día, el cuadro del
 americano, los marcadores y a quién le toca pagar la cancha.

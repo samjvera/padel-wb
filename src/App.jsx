@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import Availability from './components/Availability';
 import MatchDay from './components/MatchDay';
-import Payments from './components/Payments';
 import Cuentas from './components/Cuentas';
 import Historial from './components/Historial';
 import Setup from './components/Setup';
@@ -21,7 +20,7 @@ export default function App() {
   const [players, setPlayers] = useState({});
   const [week, setWeek] = useState({ availability: {}, status: 'abierta' });
   const [session, setSession] = useState(null);
-  const [pagos, setPagos] = useState({ paidCount: {}, history: [] });
+  const [pagos, setPagos] = useState({});
   const [ledger, setLedger] = useState({ costoNoche: 20, movimientos: [] });
   const [sesiones, setSesiones] = useState([]);
   const [semanas, setSemanas] = useState({});
@@ -67,7 +66,7 @@ export default function App() {
 
   async function onFijar(best) {
     const confirmed = whoIsIn(week.availability, best.cid);
-    const payerId = elegirPagador(confirmed, players, pagos.paidCount, pagos.order);
+    const payerId = elegirPagador(confirmed, players, ledger.movimientos, pagos.order);
     await fijarDia(wid, best.cid, confirmed, payerId);
     setTab('partido');
   }
@@ -100,11 +99,7 @@ export default function App() {
           </div>
         )}
         {tab === 'pagos' && (
-          <>
-            <Cuentas ledger={ledger} players={players} pagos={pagos} />
-            <div className="court-rule my-6" />
-            <Payments wid={wid} week={week} players={players} pagos={pagos} />
-          </>
+          <Cuentas ledger={ledger} players={players} pagos={pagos} week={week} />
         )}
       </main>
 
@@ -124,7 +119,7 @@ function Header({ wid, me, fijada, onCambiar }) {
     <header className="flex items-center justify-between gap-3 mb-4">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <h1 className="t-display text-lg">Cancha</h1>
+          <h1 className="t-display text-lg">Padel</h1>
           <span className={`badge ${fijada ? 'badge-ac' : 'badge-off'}`}>
             {fijada ? 'fijada' : 'abierta'}
           </span>
@@ -234,7 +229,7 @@ function QuienEres({ players, onElegir }) {
 
   return (
     <div className="min-h-dvh max-w-lg mx-auto px-6 py-12">
-      <h1 className="t-display text-4xl leading-none">Cancha</h1>
+      <h1 className="t-display text-4xl leading-none">Padel</h1>
       <p className="t-eyebrow mt-5">¿Cómo te llamas?</p>
       <p className="text-sm text-tx/55 mt-2 leading-relaxed">
         Escribe tu nombre y ya estás dentro. Se queda guardado en este teléfono.

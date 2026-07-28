@@ -50,7 +50,7 @@ export function icsPartido({ fecha, slot, jugadores, pagador, url }) {
   ].join('\n');
 
   return build([
-    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Cancha//Padel//ES', 'CALSCALE:GREGORIAN',
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Padel//Grupo//ES', 'CALSCALE:GREGORIAN',
     'BEGIN:VEVENT',
     `UID:partido-${fmtLocal(inicio)}@cancha`,
     `DTSTAMP:${fmtUTC(new Date())}`,

@@ -18,7 +18,7 @@ let avisar = null;
 export const alFallar = cb => { avisar = cb; };
 
 const vigilar = promesa => promesa.catch(e => {
-  console.error('[Cancha] no se pudo guardar:', e);
+  console.error('[Padel] no se pudo guardar:', e);
   avisar?.(e?.code === 'permission-denied'
     ? 'No se pudo guardar: las reglas de Firestore lo están bloqueando. Vuelve a publicarlas (Paso 3 del README).'
     : `No se pudo guardar: ${e?.message || 'error desconocido'}`);
@@ -82,7 +82,7 @@ export async function crearGrupo(jugadores, ordenPago) {
       name: j.name, gender: j.gender, isGuest: false, active: true,
     });
   }
-  batch.set(doc(db, 'meta', 'payments'), { paidCount: {}, history: [], order: ordenPago });
+  batch.set(doc(db, 'meta', 'payments'), { order: ordenPago });
   batch.set(doc(db, 'meta', 'setup'), { done: true, at: serverTimestamp() });
   await vigilar(batch.commit());
 }
@@ -161,14 +161,7 @@ export const guardarLedger = datos =>
 
 /* ---------- pagos ---------- */
 
+/** Solo guarda el orden de la cola. Los turnos se cuentan de las partidas. */
 export function watchPayments(cb) {
-  return onSnapshot(doc(db, 'meta', 'payments'), d =>
-    cb(d.exists() ? d.data() : { paidCount: {}, history: [] }));
-}
-
-export async function confirmarPago(wid, playerId, paidCount, history) {
-  await setDoc(doc(db, 'meta', 'payments'), {
-    paidCount: { ...paidCount, [playerId]: (paidCount[playerId] ?? 0) + 1 },
-    history: [{ weekId: wid, playerId, at: Date.now() }, ...(history || [])].slice(0, 60),
-  }, { merge: true });
+  return onSnapshot(doc(db, 'meta', 'payments'), d => cb(d.exists() ? d.data() : {}));
 }

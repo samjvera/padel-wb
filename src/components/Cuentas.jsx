@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { deudas, repartir, nuevoId } from '../lib/ledger';
-import { colaDePago } from '../lib/payments';
+import { colaDePago, elegirPagador } from '../lib/payments';
 import { guardarLedger } from '../lib/firebase';
 
 const dinero = n => `$${Math.abs(n).toFixed(2).replace(/\.00$/, '')}`;
@@ -8,7 +8,7 @@ const hoy = () => new Date().toISOString().slice(0, 10);
 const aFecha = s => new Date(s + 'T12:00:00').getTime();
 const corta = t => new Date(t).toLocaleDateString('es', { day: 'numeric', month: 'short' });
 
-export default function Cuentas({ ledger, players, pagos }) {
+export default function Cuentas({ ledger, players, pagos, week }) {
   const [abrir, setAbrir] = useState(null);   // 'dinero' | 'partida' | null
   const [ajustes, setAjustes] = useState(false);
 
@@ -25,7 +25,7 @@ export default function Cuentas({ ledger, players, pagos }) {
   const borrar = id => guardar(mov.filter(m => m.id !== id));
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-4">
       <header>
         <p className="t-section">Cuentas</p>
         <h2 className="t-display text-3xl mt-1">Quién le debe a quién</h2>
@@ -33,7 +33,7 @@ export default function Cuentas({ ledger, players, pagos }) {
 
       {/* Deudas */}
       <div className="panel overflow-hidden">
-        <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-br">
+        <div className="panel-cab">
           <span className="t-eyebrow">Quién le debe a quién</span>
           {d.lista.length > 0 && (
             <span className="t-num text-micro text-t3">{d.lista.length}</span>
@@ -114,7 +114,7 @@ export default function Cuentas({ ledger, players, pagos }) {
           )}
 
           {abrir === 'partida' ? (
-            <NuevaPartida players={players} pagos={pagos} costo={costo}
+            <NuevaPartida players={players} pagos={pagos} mov={mov} costo={costo}
               onCerrar={() => setAbrir(null)}
               onGuardar={m => { anadir(m); setAbrir(null); }} />
           ) : (
@@ -127,9 +127,11 @@ export default function Cuentas({ ledger, players, pagos }) {
       </div>
 
       {/* Dinero */}
-      <div>
-        <p className="t-eyebrow mb-2">Dinero llevado</p>
-        <div className="panel overflow-hidden py-0">
+      <div className="panel overflow-hidden">
+        <div className="panel-cab">
+          <span className="t-eyebrow">Dinero llevado</span>
+        </div>
+        <div>
           {pagosLista.length === 0 ? (
             <p className="text-sm text-tx/50">Nadie ha llevado dinero todavía.</p>
           ) : (
@@ -163,6 +165,56 @@ export default function Cuentas({ ledger, players, pagos }) {
       </button>
       {ajustes && <Precio costo={costo} onGuardar={p => guardar(mov, p)} />}
     </section>
+  );
+}
+
+function Rotacion({ players, mov, pagos, week, n }) {
+  const [abierto, setAbierto] = useState(false);
+  const orden = pagos?.order;
+  const cola = colaDePago(players, mov, orden);
+  const confirmados = week?.confirmed || [];
+  const asignado = week?.status === 'fijada'
+    ? week?.payerId
+    : elegirPagador(cola.map(c => c.id), players, mov, orden);
+
+  if (!cola.length) return null;
+
+  return (
+    <div className="panel overflow-hidden">
+      <button className="panel-cab w-full" onClick={() => setAbierto(!abierto)}>
+        <span className="t-eyebrow">
+          {week?.status === 'fijada' ? 'Paga esta partida' : 'Le toca a'}
+        </span>
+        <span className="t-num text-micro text-t3">{abierto ? '−' : 'ver cola'}</span>
+      </button>
+
+      <div className="fila border-b-0">
+        <span className="text-lg font-semibold flex-1">
+          {asignado ? n(asignado) : 'Nadie de la rotación'}
+        </span>
+        {week?.status === 'fijada' && asignado && (
+          <span className="badge badge-wn">asignado</span>
+        )}
+      </div>
+
+      {abierto && (
+        <ul className="border-t border-br">
+          {cola.map((c, i) => (
+            <li key={c.id} className="fila">
+              <span className="t-num text-tiny text-t3 w-4">{i + 1}</span>
+              <span className="flex-1 text-base">{c.nombre}</span>
+              <span className="t-num text-tiny text-t2">
+                {c.veces} {c.veces === 1 ? 'turno' : 'turnos'}
+              </span>
+            </li>
+          ))}
+          <li className="panel-pie border-t-0">
+            Los turnos salen de las partidas registradas abajo. Si te toca y no
+            vas, tu contador no sube y sigues arriba.
+          </li>
+        </ul>
+      )}
+    </div>
   );
 }
 
@@ -228,8 +280,8 @@ function LlevoDinero({ players, onCerrar, onGuardar }) {
   );
 }
 
-function NuevaPartida({ players, pagos, costo, onCerrar, onGuardar }) {
-  const sugerido = colaDePago(players, pagos?.paidCount || {}, pagos?.order)[0]?.id;
+function NuevaPartida({ players, pagos, mov, costo, onCerrar, onGuardar }) {
+  const sugerido = colaDePago(players, mov, pagos?.order)[0]?.id;
   const [quien, setQuien] = useState(sugerido ?? null);
   const [fecha, setFecha] = useState(hoy());
   const [monto, setMonto] = useState(String(costo));
